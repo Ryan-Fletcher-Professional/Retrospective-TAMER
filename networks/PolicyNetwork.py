@@ -1,7 +1,7 @@
+from main.GLOBALS import *
 import Network
 
 
 class PolicyNetwork(Network):
-    def __init__(self):
-        super().__init__()
-        # TODO define network architecture.
+    def __init__(self, mode=DEFAULT_MODE, sizes=None):
+        super().__init__(sizes)
