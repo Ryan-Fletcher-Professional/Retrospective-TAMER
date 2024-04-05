@@ -187,13 +187,8 @@ if __name__ == "__main__":
     # data = collect_live_data(net, env_name=mode)
     # print(data)
 
-
-    #mode = MOUNTAIN_CAR_MODE
-    # net = CarRewardNet()
     mode = TTT_MODE
-    net = Net(TTT_MODE)
+    net = Net(mode)
     for i in range(play_iters):
         data = collect_live_data(net, env_name=mode)
-        print(data)
-
-    #collect human demos
+        print("Data for run " + str(i + 1) + ":\n" + str(data))

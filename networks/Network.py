@@ -18,12 +18,32 @@ def mlp(sizes, activation=nn.ReLU, output_activation=nn.Identity):
 
 
 class Net(nn.Module):
-    def __init__(self, mode=DEFAULT_MODE, sizes=None):
+    def __init__(self, mode: str = DEFAULT_MODE, sizes: [int] = None):
         super().__init__()
+        self.mode = mode
         if sizes is None:
             sizes = DEFAULT_POLICY_SIZES[mode]
         self.network = mlp(sizes)
 
-    def predict_return(self, traj):
-        # calculate return (cumulative reward) of a trajectory (could be any number of timesteps)
-        return self.network(traj).sum()
+    def predict(self, state_action):
+        out = self.network(state_action)
+        return out
+
+    def predict_max_action(self, state):
+        # creates a matrix [1, 0, 0,
+        #                   0, 1, 0,
+        #                   0, 0, 1]
+
+        action_space = np.eye(3)
+        max_action_ind = 0
+        preds = []
+        print("--------------- " + self.mode + " ---------------")
+        for action in action_space:
+            state_action = torch.as_tensor(np.append(state, action), dtype=torch.float32)
+            new_pred = self.predict(state_action)
+            new_pred_proba = nn.functional.softmax(new_pred)
+            preds.append(new_pred_proba[1].item())
+            print(new_pred_proba)
+        best_action_ind = np.argmax(np.asarray(preds))
+        print("best action", best_action_ind)
+        return best_action_ind
