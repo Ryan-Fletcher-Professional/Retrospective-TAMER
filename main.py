@@ -7,6 +7,8 @@ import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 from pynput import keyboard
+import snake_gym
+from main.GLOBALS import * 
 
 
 device = torch.device('cpu')
@@ -35,7 +37,7 @@ class PolicyNetwork(nn.Module):
         return x
 
 
-# currently only tested that it works with mountain car
+# currently only works with mountain car
 def collect_live_data(pi, env_name, human_render=True):
     '''
     Run a live simulation and collect keyboard data
@@ -91,7 +93,7 @@ if __name__ == "__main__":
 
     #args = parser.parse_args()
     pi = PolicyNetwork()
-    data = collect_live_data(pi, 5, env_name="MountainCar-v0")
+    data = collect_live_data(pi, env_name="MountainCar-v0")
     print(data)
-    
+
     #collect human demos
