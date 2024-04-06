@@ -46,6 +46,7 @@ class Net(nn.Module):
             if invalid_actions[i] == 1:
                 preds.append(0)
             else:
+                print("STATE: " + str(state))
                 state_action = torch.as_tensor(np.append(state, action_space[i]), dtype=torch.float32)
                 new_pred = self.predict(state_action)
                 new_pred_proba = nn.functional.softmax(new_pred, dim=0)

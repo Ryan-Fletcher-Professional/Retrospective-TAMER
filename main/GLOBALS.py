@@ -1,5 +1,5 @@
 TTT_SIZE = 3
-SNAKE_GRID_DIMS = (15, 15)
+SNAKE_GRID_DIMS = (10, 10)
 
 MOUNTAIN_CAR_MODE = "MountainCar-v0"
 MOUNTAIN_CAR_STATE_SIZE = 2
@@ -7,8 +7,8 @@ MOUNTAIN_CAR_ACTION_SIZE = 3
 TTT_MODE = "tictactoe-v0"
 TTT_STATE_SIZE = (TTT_SIZE ** 2) * 3  # N*N squares, 3 possible logits for each square
 TTT_ACTION_SIZE = TTT_SIZE ** 2
-SNAKE_MODE = "snake-v0"  # TODO : Get working
-SNAKE_STATE_SIZE = (SNAKE_GRID_DIMS[0] * SNAKE_GRID_DIMS[1]) + 2  # One for each tile + apple coords
+SNAKE_MODE = "snake-tiled-v0"  # TODO : Get working
+SNAKE_STATE_SIZE = (SNAKE_GRID_DIMS[0] * SNAKE_GRID_DIMS[1]) * 3  # N*M squares, 3 possible logits for each square      #+ 2  # One for each tile + apple coords
 SNAKE_ACTION_SIZE = 4
 
 MODES = [MOUNTAIN_CAR_MODE, TTT_MODE, SNAKE_MODE]

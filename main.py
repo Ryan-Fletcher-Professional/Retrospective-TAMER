@@ -15,6 +15,7 @@ import snake_gym
 from gym_tictactoe.gym_tictactoe.env import TicTacToeEnv, agent_by_mark, check_game_status,\
     after_action_state, tomark, next_mark
 from main.GLOBALS import *
+from main.SnakeWrapper import SnakeWrapper
 from main.TTTWrapper import TTTWrapper
 from networks.Network import Net
 from networks.RewardNetwork import *
@@ -63,14 +64,13 @@ def collect_live_data(net: Net, env_name: str, human_render: bool = True):
 
     def get_invalid_actions(inputs):
         invalids = np.zeros(ACTION_SIZES[env_name])
-        if env_name == MOUNTAIN_CAR_MODE:
-            return np.zeros(MOUNTAIN_CAR_ACTION_SIZE)
         if env_name == TTT_MODE:
             for j in range(len(invalids)):
                 invalids[j] = 1 if inputs[j * 3] == 0 else 0  # First logit for each square is the 'empty square' logit
-            return invalids
         if env_name == SNAKE_MODE:
-            pass  # TODO : Return action logit indicating 'move back the way it came'
+            print("TODO : SNAKE INVALID ACTIONS")  # TODO : Return action logit indicating 'move back the way it came'
+
+        return invalids
 
     agents = [lambda net_input: net.predict_max_action(net_input, get_invalid_actions(net_input))]
     current_agent_index = 0
@@ -83,6 +83,8 @@ def collect_live_data(net: Net, env_name: str, human_render: bool = True):
         env = TTTWrapper(TicTacToeEnv(), '0', human_render)
         agents.append(lambda _: random.choice(env.available_actions()))
         run_continuously = False
+    elif env_name == SNAKE_MODE:
+        env = SnakeWrapper(gym.make(env_name))  # Snake game does not use env.render() so we can't make it not render
     elif human_render:
         env = gym.make(env_name, render_mode='human')
     else:
@@ -149,7 +151,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     play_iters = args.num_plays
 
-    mode = MOUNTAIN_CAR_MODE
+    mode = SNAKE_MODE
     net = Net(mode)
     for i in range(play_iters):
         data = collect_live_data(net, env_name=mode)
