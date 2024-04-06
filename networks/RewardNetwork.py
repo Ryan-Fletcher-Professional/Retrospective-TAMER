@@ -38,11 +38,13 @@ class CarRewardNet(nn.Module):
         action_space = np.eye(3)
         max_action_ind = 0
         preds = []
+        #print("----------------------")
         for action in action_space:
             state_action = torch.as_tensor(np.append(state, action), dtype=torch.float32)
             new_pred = self.predict(state_action)
             new_pred_proba = nn.functional.softmax(new_pred)
             preds.append(new_pred_proba[1].item())
+            #print(new_pred_proba)
         best_action_ind = np.argmax(np.asarray(preds))
         #print("predicted action", best_action_ind)
         return best_action_ind
