@@ -24,7 +24,7 @@ class Net(nn.Module):
         self.mode = mode
         if sizes is None:
             sizes = DEFAULT_POLICY_SIZES[mode]
-        self.action_size = sizes[-1]
+        self.action_size = ACTION_SIZES[mode]
         self.network = mlp(sizes)
 
     def predict(self, state_action):
@@ -46,7 +46,8 @@ class Net(nn.Module):
             if invalid_actions[i] == 1:
                 preds.append(0)
             else:
-                print("STATE: " + str(state))
+                #print("STATE: " + str(state))
+                #print("ACTION: " + str(action_space[i]), "action size", self.action_size)
                 state_action = torch.as_tensor(np.append(state, action_space[i]), dtype=torch.float32)
                 new_pred = self.predict(state_action)
                 new_pred_proba = nn.functional.softmax(new_pred, dim=0)

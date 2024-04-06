@@ -31,12 +31,12 @@ MODE_OUTPUT_SIZES = {mode: size for mode, size in zip(MODES, _input_sizes)}
 def _layer_safe(sizes: [int or float]):  # So we never accidentally make a layer have 0 neurons
     return [max(1, int(size)) for size in sizes]
 
-
+FEEDBACK_SIZE = 2 # positive/negative
 DEFAULT_POLICY_SIZES = {mode: _layer_safe([MODE_INPUT_SIZES[mode], 32, MODE_OUTPUT_SIZES[mode]]) for mode in MODES}
-DEFAULT_POLICY_SIZES[MOUNTAIN_CAR_MODE] = _layer_safe([MODE_INPUT_SIZES[MOUNTAIN_CAR_MODE], 16, 16, MOUNTAIN_CAR_ACTION_SIZE])
-DEFAULT_POLICY_SIZES[TTT_MODE] = _layer_safe([MODE_INPUT_SIZES[TTT_MODE], 16, 16, TTT_ACTION_SIZE])
+DEFAULT_POLICY_SIZES[MOUNTAIN_CAR_MODE] = _layer_safe([MODE_INPUT_SIZES[MOUNTAIN_CAR_MODE], 16, 16, FEEDBACK_SIZE])
+DEFAULT_POLICY_SIZES[TTT_MODE] = _layer_safe([MODE_INPUT_SIZES[TTT_MODE], 16, 16, FEEDBACK_SIZE])
 _snake_bulge_layer_size = _layer_safe([MODE_INPUT_SIZES[SNAKE_MODE] * 1.5])[0]
 DEFAULT_POLICY_SIZES[SNAKE_MODE] = _layer_safe([MODE_INPUT_SIZES[SNAKE_MODE],
                                                 _snake_bulge_layer_size,
-                                                (_snake_bulge_layer_size + SNAKE_ACTION_SIZE) / 2,
-                                                SNAKE_ACTION_SIZE])
+                                                (_snake_bulge_layer_size + FEEDBACK_SIZE) / 2,
+                                                FEEDBACK_SIZE])

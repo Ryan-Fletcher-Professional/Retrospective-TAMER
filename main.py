@@ -34,7 +34,7 @@ def train_network(net, input, output):
     pred_action_logits = net.predict(torch.as_tensor(input, dtype=torch.float32))
 
     # one hot encode output and make it tensor
-    output_one_hot = np.zeros(len(pred_action_logits))
+    output_one_hot = np.zeros(2)
     output_one_hot[output] = 1
     output_tensor = torch.as_tensor(output_one_hot)
     #now compute loss
@@ -68,7 +68,7 @@ def train_network_w_gamma(net, state_action_data, feedback, time_data, feedback_
     # feedback was recorded
     time_data_mod = np.copy(time_data)
     time_data_mod = np.append(time_data_mod, feedback_delta)
-    time_data_mod = time_data_mod[-1]-np.asarray(time_data_mod)
+    time_data_mod = time_data_mod[-1]-time_data_mod
     n = len(time_data_mod)
 
     # use gamma function to decide on how feedback credits should be
@@ -86,13 +86,14 @@ def train_network_w_gamma(net, state_action_data, feedback, time_data, feedback_
     network_output = np.zeros((len(credits), 2))
     network_output[:, feedback] = credits
 
-
+    print("+++++++++++++++", state_action_data.shape)
     input_tensor = torch.as_tensor(state_action_data, dtype=torch.float32).reshape(state_action_data.shape[0], -1)
     output_tensor = torch.as_tensor(network_output).reshape(network_output.shape[0], -1)
 
 
     # predict for all observations
-    pred_action_logits = net(input_tensor)
+    print("-----------------", input_tensor.shape, output_tensor.shape)
+    pred_action_logits = net.predict(input_tensor)
 
     # optimizer
     optimizer = Adam(net.parameters(), lr=0.2)
@@ -108,32 +109,14 @@ def train_network_w_gamma(net, state_action_data, feedback, time_data, feedback_
     print("Trained based on feedback", feedback)
 
 
-# def train_network(net, input, output):
-#     optimizer = Adam(net.parameters(), lr=0.2)
-#     loss_criterion = nn.CrossEntropyLoss()
-#     optimizer.zero_grad()
-#
-#     #run action,state through policy to get predicted logits for classifying action
-#     pred_action_logits = net(torch.as_tensor(input, dtype=torch.float32))
-#     # one hot encode output and make it tensor
-#     output_one_hot = np.zeros(2)
-#     output_one_hot[output] = 1
-#     output_tensor = torch.as_tensor(output_one_hot)
-#     #now compute loss
-#     loss = loss_criterion(pred_action_logits, output_tensor)
-#     #back propagate the error through the network
-#     loss.backward()
-#     #perform update on policy parameters
-#     optimizer.step()
-
-
-def make_state_action(state, action, n_actions=3):
+def make_state_action(state, action, mode):
     '''
     Takes in the state as obs np array
     and the action as an integer
     returns np array of state and one-hot encoded action
     '''
     # one hot encode the actions
+    n_actions = ACTION_SIZES[mode]
     one_hot_action = np.zeros(n_actions)
     one_hot_action[action] = 1
     # append the state, actions to obs_data
@@ -158,7 +141,7 @@ def collect_live_data(net, env_name, human_render=True):
     state_action_history = np.array([])
     feedback_history = np.array([])
     time_data = np.array([])
-    full_obs_data = np.array([])
+    full_obs_data = []
     can_go = True
 
     def on_press(key):
@@ -181,7 +164,7 @@ def collect_live_data(net, env_name, human_render=True):
             print("Exception: ", e)
             return
 
-        state_action = make_state_action(last_state, last_action)
+        state_action = make_state_action(last_state, last_action, env_name)
         state_action_history = np.append(state_action_history, state_action)
         feedback_history = np.append(feedback_history, feedback)
         if env_name == MOUNTAIN_CAR_MODE:
@@ -242,15 +225,15 @@ def collect_live_data(net, env_name, human_render=True):
         last_state, current_reward, terminated, truncated, info = env.step(last_action)
         done = terminated or truncated
         total_reward += current_reward
-        state_action = make_state_action(last_state, last_action)
-        full_obs_data = np.append(full_obs_data, state_action)
+        state_action = make_state_action(last_state, last_action, env_name)
+        full_obs_data.append(state_action)
         # how much time passed since first frame
         delta = (time.now() - start_time).total_seconds()
         time_data = np.append(time_data, delta)
         if (not run_continuously) and (current_agent_index in wait_agents):
             can_go = False
         while not can_go:
-            time.sleep(1)
+            tm.sleep(1)
 
     if env_name == TTT_MODE:
         env.show_result(human_render, total_reward)
@@ -273,7 +256,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     play_iters = args.num_plays
 
-    net = Net(mode)
+    net = Net(args.mode)
     for i in range(play_iters):
         data = collect_live_data(net, env_name=args.mode)
         print("Data for run " + str(i + 1) + ":\n" + str(data))
