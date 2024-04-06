@@ -1,7 +1,5 @@
 import gym
-from gym import error, spaces, utils
-from gym.utils import seeding
-from snake_gym.envs.modules import *
+from environment.snake_gym.envs.modules import *
 from snake_gym.envs.snake_env import SnakeEnv
 import numpy as np
 from gym import spaces

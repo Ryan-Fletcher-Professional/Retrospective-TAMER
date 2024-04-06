@@ -1,1 +1,0 @@
-IMPORTANT: Requires that <>/site-packages/gym-tictactoe/gym_tictactoe/env.py line "self.seed()" be commented out!

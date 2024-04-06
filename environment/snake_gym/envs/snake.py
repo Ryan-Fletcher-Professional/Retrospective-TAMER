@@ -2,7 +2,7 @@ import pygame
 import sys
 import time
 import random
-from snake_gym.envs.modules import *
+from environment.snake_gym.envs.modules import *
 from pygame.locals import *
 import numpy as np
 

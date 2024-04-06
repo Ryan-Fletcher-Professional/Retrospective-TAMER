@@ -11,8 +11,8 @@ import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 from pynput import keyboard
-import snake_gym
-from gym_tictactoe.gym_tictactoe.env import TicTacToeEnv, agent_by_mark, check_game_status,\
+import environment.snake_gym
+from environment.gym_tictactoe.gym_tictactoe.env import TicTacToeEnv, agent_by_mark, check_game_status,\
     after_action_state, tomark, next_mark
 from environment.GLOBALS import *
 from environment.SnakeWrapper import SnakeWrapper
