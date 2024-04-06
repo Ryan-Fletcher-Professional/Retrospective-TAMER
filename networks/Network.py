@@ -5,7 +5,7 @@ from torch.distributions.categorical import Categorical
 from torch.optim import Adam
 import numpy as np
 
-from main.GLOBALS import *
+from environment.GLOBALS import *
 
 
 def mlp(sizes, activation=nn.ReLU, output_activation=nn.Identity):

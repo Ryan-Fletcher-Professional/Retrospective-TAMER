@@ -14,9 +14,9 @@ from pynput import keyboard
 import snake_gym
 from gym_tictactoe.gym_tictactoe.env import TicTacToeEnv, agent_by_mark, check_game_status,\
     after_action_state, tomark, next_mark
-from main.GLOBALS import *
-from main.SnakeWrapper import SnakeWrapper
-from main.TTTWrapper import TTTWrapper
+from environment.GLOBALS import *
+from environment.SnakeWrapper import SnakeWrapper
+from environment.TTTWrapper import TTTWrapper
 from networks.Network import Net
 from networks.RewardNetwork import *
 from scipy.stats import gamma
@@ -142,7 +142,6 @@ def make_state_action(state, action, n_actions=3):
     return state_action
 
 
-
 # currently only works with mountain car
 def collect_live_data(net, env_name, human_render=True):
     '''
@@ -153,8 +152,6 @@ def collect_live_data(net, env_name, human_render=True):
     # feedback_data = []
     # obs_data = []
     # time_data = []
-    
-    
 
     last_action = 0
     last_state = np.array([])
@@ -166,16 +163,16 @@ def collect_live_data(net, env_name, human_render=True):
 
     def on_press(key):
         nonlocal state_action_history, feedback_history, can_go
-        if(len(full_obs_data)==0):
+        if (len(full_obs_data) == 0):
             print("Slow down! Haven't even started playing yet.")
             return
         try:
             # c for negative feedback
-            if key.char=='c':
-                feedback=0
+            if key.char == 'c':
+                feedback = 0
             # v for positive feedback
-            elif key.char=='v':
-                feedback=1
+            elif key.char == 'v':
+                feedback = 1
             else:
                 print("WRONG KEY! Press 'c' or 'v'")
                 return
@@ -190,7 +187,7 @@ def collect_live_data(net, env_name, human_render=True):
         if env_name == MOUNTAIN_CAR_MODE:
             # how much time passed since first frame
             # and the time the  feedback was recorded
-            feedback_delta = (time.now()-start_time).total_seconds()
+            feedback_delta = (time.now() - start_time).total_seconds()
             train_network_w_gamma(net, full_obs_data, feedback, time_data, feedback_delta)
             # TODO : Train snake w/gamma
         else:
@@ -248,7 +245,7 @@ def collect_live_data(net, env_name, human_render=True):
         state_action = make_state_action(last_state, last_action)
         full_obs_data = np.append(full_obs_data, state_action)
         # how much time passed since first frame
-        delta = (time.now()-start_time).total_seconds()
+        delta = (time.now() - start_time).total_seconds()
         time_data = np.append(time_data, delta)
         if (not run_continuously) and (current_agent_index in wait_agents):
             can_go = False
@@ -269,16 +266,16 @@ def collect_live_data(net, env_name, human_render=True):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=None)
     parser.add_argument('--num_plays', default=5, type=int, help="number of play runs to collect")
+    parser.add_argument('--mode', default=DEFAULT_MODE, type=str, help="Which game to do")
     #parser.add_argument('--num_bc_iters', default = 100, type=int, help="number of iterations to run BC")
     #parser.add_argument('--num_inv_dyn_iters', default = 500, type=int, help="number of iterations to train inverse dynamics model")
     #parser.add_argument('--num_evals', default=6, type=int, help="number of times to run policy after training for evaluation")
     args = parser.parse_args()
     play_iters = args.num_plays
 
-    mode = SNAKE_MODE
     net = Net(mode)
     for i in range(play_iters):
-        data = collect_live_data(net, env_name=mode)
+        data = collect_live_data(net, env_name=args.mode)
         print("Data for run " + str(i + 1) + ":\n" + str(data))
 
     #collect human demos
