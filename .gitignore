@@ -1,2 +1,3 @@
 .idea/
-game_main_ignore.py
+__pycache__/
+*/__pycache__/
