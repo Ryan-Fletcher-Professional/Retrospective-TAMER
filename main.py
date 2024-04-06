@@ -117,7 +117,7 @@ def collect_live_data(net: Net, env_name: str, human_render: bool = True):
     listener.stop()
     listener.join()
 
-    output_dict = {"states": np.asarray(state_action_history), "feedback": np.asarray(feedback_history)}
+    output_dict = { "states": state_action_history, "feedback": feedback_history }
     return output_dict
 
 
@@ -144,7 +144,7 @@ def train_network(net, input, output):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('--num_plays', default=1, type=int, help="number of play runs to collect")
+    parser.add_argument('--num_plays', default=5, type=int, help="number of play runs to collect")
     #parser.add_argument('--num_bc_iters', default = 100, type=int, help="number of iterations to run BC")
     #parser.add_argument('--num_inv_dyn_iters', default = 500, type=int, help="number of iterations to train inverse dynamics model")
     #parser.add_argument('--num_evals', default=6, type=int, help="number of times to run policy after training for evaluation")

@@ -6,7 +6,7 @@ import numpy as np
 class SnakeWrapper(gym.Wrapper):
     def __init__(self, env):
         super().__init__(env)
-        self.env.fps = 60  # Don't know if this does anything
+        self.env.fps = 2  # Don't know if this does anything  # TODO : Make this work properly
 
     def flatten(self, state):
         flattened_obs = np.zeros(np.prod(state.shape) * 3)
