@@ -44,7 +44,7 @@ class CarRewardNet(nn.Module):
             new_pred = self.predict(state_action)
             new_pred_proba = nn.functional.softmax(new_pred)
             preds.append(new_pred_proba[1].item())
-            print(new_pred_proba)
+            #print(new_pred_proba)
         best_action_ind = np.argmax(np.asarray(preds))
         print("best action", best_action_ind)
         return best_action_ind
