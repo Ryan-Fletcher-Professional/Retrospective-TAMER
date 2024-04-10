@@ -4,16 +4,19 @@ import numpy as np
 
 
 class TTTWrapper(gym.Wrapper):
-    def __init__(self, env, start_mark, human_render=True):
+    def __init__(self, env, start_mark, frame_limit=200, human_render=True):
         super().__init__(env)
         self.current_agent_index = 0
         self.current_mark = start_mark
         self.set_start_mark(start_mark)
+        self.frame_limit = frame_limit
+        self.frames = 0
         self.human_render = human_render
 
     def reset(self):
         new_set = super().reset()
         self.current_mark = new_set[1]
+        self.frames = 0
         return new_set[0], new_set[1]
 
     def step(self, action):
@@ -25,7 +28,11 @@ class TTTWrapper(gym.Wrapper):
         flattened_obs = np.zeros(len(obs[0]) * 3)
         for i in range(len(obs[0])):  # Transforms observations into 1-hot-encoded inputs for the network
             flattened_obs[(i * 3) + obs[0][i]] = 1
-        return flattened_obs, reward, done, done, info
+        self.frames += 1
+        truncated = False
+        if (self.frames >= self.frame_limit) and not done:
+            truncated = True
+        return flattened_obs, reward, done, truncated, info
 
     def show_result(self, human_render, total_reward):
         self.env.show_result(human_render, self.current_mark, total_reward)

@@ -22,6 +22,7 @@ from networks.RewardNetwork import *
 from scipy.stats import gamma
 from datetime import datetime as time
 import time as tm
+from environment.MountainCarWrapper import MountainCarWrapper
 
 device = torch.device('cpu')
 
@@ -126,15 +127,12 @@ def make_state_action(state, action, mode):
 
 
 # currently only works with mountain car
-def collect_live_data(net, env_name, human_render=True):
+def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True):
     '''
     Run a live simulation and collect keyboard data
     inputs: policy, gym environment name, and whether to render
     outputs: a list of dictionaries {"state": np.array, "feedback": binary}
     '''
-    # feedback_data = []
-    # obs_data = []
-    # time_data = []
 
     last_action = 0
     last_state = np.array([])
@@ -146,7 +144,7 @@ def collect_live_data(net, env_name, human_render=True):
 
     def on_press(key):
         nonlocal state_action_history, feedback_history, can_go
-        if (len(full_obs_data) == 0):
+        if len(full_obs_data) == 0:
             print("Slow down! Haven't even started playing yet.")
             return
         try:
@@ -188,7 +186,10 @@ def collect_live_data(net, env_name, human_render=True):
             for j in range(len(invalids)):
                 invalids[j] = 1 if inputs[j * 3] == 0 else 0  # First logit for each square is the 'empty square' logit
         if env_name == SNAKE_MODE:
-            print("TODO : SNAKE INVALID ACTIONS")  # TODO : Return action logit indicating 'move back the way it came'
+            idx = env.get_invalid_move()
+            print(idx)
+            if idx is not None:
+                invalids[idx] = 1
 
         return invalids
 
@@ -198,17 +199,22 @@ def collect_live_data(net, env_name, human_render=True):
 
     run_continuously = True
 
-    if env_name == TTT_MODE:
+    if env_name == MOUNTAIN_CAR_MODE:
+        if human_render:
+            env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE, render_mode='human'), frame_limit)
+        else:
+            env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE), frame_limit)
+    elif env_name == TTT_MODE:
         # Wraps the TTT environment to alter arguments for version compatibility
-        env = TTTWrapper(TicTacToeEnv(), '0', human_render)
+        env = TTTWrapper(TicTacToeEnv(), '0', frame_limit, human_render)
         agents.append(lambda _: random.choice(env.available_actions()))
         run_continuously = False
     elif env_name == SNAKE_MODE:
-        env = SnakeWrapper(gym.make(env_name))  # Snake game does not use env.render() so we can't make it not render
-    elif human_render:
-        env = gym.make(env_name, render_mode='human')
+        env = SnakeWrapper(gym.make(env_name), frame_limit, snake_max_fps)  # Snake game does not use env.render() so we can't make it not render
+    elif env_name == "snake-v0":
+        print("!!!!!!!!\tWARNING: Do you mean to play snake-tiled-v0?\t!!!!!!!!")
     else:
-        env = gym.make(env_name)
+        print("!!!!!!!!\tError: No valid environment name\t!!!!!!!!")
 
     total_reward = 0
     last_state, _ = env.reset()
@@ -250,15 +256,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=None)
     parser.add_argument('--num_plays', default=5, type=int, help="number of play runs to collect")
     parser.add_argument('--mode', default=DEFAULT_MODE, type=str, help="Which game to do")
-    #parser.add_argument('--num_bc_iters', default = 100, type=int, help="number of iterations to run BC")
-    #parser.add_argument('--num_inv_dyn_iters', default = 500, type=int, help="number of iterations to train inverse dynamics model")
+    parser.add_argument('--snake_max_fps', default=10, type=int, help="max fps at which snake game should run")
+    parser.add_argument('--frame_limit', default=200, type=int, help="number of frames before episode cuts off")
     #parser.add_argument('--num_evals', default=6, type=int, help="number of times to run policy after training for evaluation")
     args = parser.parse_args()
-    play_iters = args.num_plays
 
     net = Net(args.mode)
-    for i in range(play_iters):
-        data = collect_live_data(net, env_name=args.mode)
+    for i in range(args.num_plays):
+        data = collect_live_data(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.snake_max_fps)
         print("Data for run " + str(i + 1) + ":\n" + str(data))
 
-    #collect human demos
+    # collect human demos
