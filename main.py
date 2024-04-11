@@ -1,5 +1,7 @@
 import random
+import os
 import sys
+sys.path.append(os.getcwd() + "/environment")
 import time
 
 import gym
@@ -11,7 +13,7 @@ import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 from pynput import keyboard
-import environment.snake_gym
+import environment.snake_gym_custom
 from environment.gym_tictactoe.gym_tictactoe.env import TicTacToeEnv, agent_by_mark, check_game_status,\
     after_action_state, tomark, next_mark
 from environment.GLOBALS import *
@@ -187,7 +189,6 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
                 invalids[j] = 1 if inputs[j * 3] == 0 else 0  # First logit for each square is the 'empty square' logit
         if env_name == SNAKE_MODE:
             idx = env.get_invalid_move()
-            print(idx)
             if idx is not None:
                 invalids[idx] = 1
 
@@ -210,11 +211,13 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
         agents.append(lambda _: random.choice(env.available_actions()))
         run_continuously = False
     elif env_name == SNAKE_MODE:
-        env = SnakeWrapper(gym.make(env_name), frame_limit, snake_max_fps)  # Snake game does not use env.render() so we can't make it not render
-    elif env_name == "snake-v0":
-        print("!!!!!!!!\tWARNING: Do you mean to play snake-tiled-v0?\t!!!!!!!!")
+        env = SnakeWrapper(gym.make(env_name), 'human' if human_render else None, frame_limit, snake_max_fps)
+    elif (env_name == "snake-v0") or (env_name == "snake-tiled-v0"):
+        print("!!!!!!!!\tError: Do you mean to play snake-custom-v0?\t!!!!!!!!")
+        return
     else:
         print("!!!!!!!!\tError: No valid environment name\t!!!!!!!!")
+        return
 
     total_reward = 0
     last_state, _ = env.reset()
