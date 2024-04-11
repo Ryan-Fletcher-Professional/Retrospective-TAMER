@@ -54,6 +54,5 @@ class Net(nn.Module):
                 preds.append(new_pred_proba[1].item())
                 #print(new_pred_proba)
         best_action_ind = np.argmax(np.asarray(preds))
-        #print("\nbest action", best_action_ind)
         #print(line + "\n")
         return best_action_ind

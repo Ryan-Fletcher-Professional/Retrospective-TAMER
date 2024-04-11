@@ -23,98 +23,31 @@ from scipy.stats import gamma
 from datetime import datetime as time
 import time as tm
 from environment.MountainCarWrapper import MountainCarWrapper
-from offline import offline_wrapper
-
-
 
 device = torch.device('cpu')
-
 
 def train_network(net, input, output):
     optimizer = Adam(net.parameters(), lr=0.2)
     loss_criterion = nn.CrossEntropyLoss()
     optimizer.zero_grad()
     #run action,state through policy to get predicted logits for classifying action
-    pred_action_logits = net.predict(torch.as_tensor(input, dtype=torch.float32))
+    pred_action_logits = net.predict(input)
+    #now compute loss
+    loss = loss_criterion(pred_action_logits, output)
+    #back propagate the error through the network
+    loss.backward()
+    #perform update on policy parameters
+    optimizer.step()
+    print("Updating network")
 
-    # one hot encode output and make it tensor
+def make_training_data(input, output):
+
+    input_tensor = torch.as_tensor(input, dtype=torch.float32)
     output_one_hot = np.zeros(2)
     output_one_hot[output] = 1
     output_tensor = torch.as_tensor(output_one_hot)
-    #now compute loss
-    loss = loss_criterion(pred_action_logits, output_tensor)
-    #back propagate the error through the network
-    loss.backward()
-    #perform update on policy parameters
-    optimizer.step()
-    print("Updating network: input ", input, " output: ", output_one_hot)
 
-
-def train_network_w_gamma(net, state_action_data, feedback, time_data, feedback_delta):
-    '''
-    net - the network to train
-    state_action_data - every single state_action pair from start of game
-                        to until feedback was given
-    feedback - binary feedback given
-    time_data - timestamps (in seconds) for every (state, action)
-    feedback_delta - timestamp of the feedback recorded
-    '''
-    alpha = MOUNTAIN_CAR_GAMMA['alpha']
-    loc = MOUNTAIN_CAR_GAMMA['loc']
-    scale = MOUNTAIN_CAR_GAMMA['scale']
-
-    state_action_data = np.asarray(state_action_data)
-
-    # copying time_data so I don't modify the original that keeps track
-    # of time for each action
-    # reverse the time so feedback happens at time 0, and each observation
-    # corresponds to how much time has passed from that observation until
-    # feedback was recorded
-    time_data_mod = np.copy(time_data)
-    time_data_mod = np.append(time_data_mod, feedback_delta)
-    time_data_mod = time_data_mod[-1]-time_data_mod
-    n = len(time_data_mod)
-
-    # use gamma function to decide on how feedback credits should be
-    # assigned
-    credits = gamma.cdf(time_data_mod[0: n-1], alpha, loc, scale) \
-            - gamma.cdf(time_data_mod[1: n], alpha, loc, scale)
-
-    # for an almost 0 credit, better to not pass it to network at all
-    # find the index of that credit cutoff
-    credits_cutoff_ind = np.argmax(credits>GAMMA_CREDIT_CUTOFF)
-    credits = credits[credits_cutoff_ind:]
-
-    # this scales the credits so the max is 1
-    credits/= max(credits)
-    state_action_data = state_action_data[credits_cutoff_ind:]
-    # convert this where each credit is [0, credit] or [credit, 0] depending
-    # on feedback
-    network_output = np.zeros((len(credits), 2))
-    network_output[:, feedback] = credits
-
-    print("+++++++++++++++", state_action_data.shape)
-    input_tensor = torch.as_tensor(state_action_data, dtype=torch.float32).reshape(state_action_data.shape[0], -1)
-    output_tensor = torch.as_tensor(network_output).reshape(network_output.shape[0], -1)
-
-
-    # predict for all observations
-    print("-----------------", input_tensor.shape, output_tensor.shape)
-    pred_action_logits = net.predict(input_tensor)
-
-    # optimizer
-    optimizer = Adam(net.parameters(), lr=0.2)
-    loss_criterion = nn.CrossEntropyLoss()
-    optimizer.zero_grad()
-
-    #now compute loss
-    loss = loss_criterion(pred_action_logits, output_tensor)
-    #back propagate the error through the network
-    loss.backward()
-    #perform update on policy parameters
-    optimizer.step()
-    print("Trained based on feedback", feedback)
-
+    return(input_tensor, output_tensor)
 
 def make_state_action(state, action, mode):
     '''
@@ -131,23 +64,54 @@ def make_state_action(state, action, mode):
 
     return state_action
 
-def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True):
+def make_training_data_with_gamma(state_action_data, feedback, time_data, feedback_delta):
     '''
-    Run a live simulation and collect keyboard data
-    inputs: policy, gym environment name, and whether to render
-    outputs: a list of dictionaries {"state": np.array, "feedback": binary}
+    This is the same function as train in online, but instead of training we just
+    save the input and output data for later
     '''
+    alpha = MOUNTAIN_CAR_GAMMA['alpha']
+    loc = MOUNTAIN_CAR_GAMMA['loc']
+    scale = MOUNTAIN_CAR_GAMMA['scale']
+    state_action_data = np.asarray(state_action_data)
 
-    last_action = 0
-    last_state = np.array([])
-    state_action_history = np.array([])
-    feedback_history = np.array([])
-    time_data = np.array([])
-    full_obs_data = []
+    time_data_mod = np.copy(time_data)
+    time_data_mod = np.append(time_data_mod, feedback_delta)
+    time_data_mod = time_data_mod[-1]-time_data_mod
+    n = len(time_data_mod)
+
+    credits = gamma.cdf(time_data_mod[0: n-1], alpha, loc, scale) \
+            - gamma.cdf(time_data_mod[1: n], alpha, loc, scale)
+
+    credits_cutoff_ind = np.argmax(credits>GAMMA_CREDIT_CUTOFF)
+    credits = credits[credits_cutoff_ind:]
+    state_action_data = state_action_data[credits_cutoff_ind:]
+
+    network_output = np.zeros((len(credits), 2))
+    network_output[:, feedback] = credits
+
+    input_tensor = torch.as_tensor(state_action_data, dtype=torch.float32).reshape(state_action_data.shape[0], -1)
+    output_tensor = torch.as_tensor(network_output).reshape(network_output.shape[0], -1)
+
+    return(input_tensor, output_tensor)
+
+
+def offline_collect_feedback(net, env_name, action_history, frame_limit=200, snake_max_fps=20, human_render=True):
+    input_size = MODE_INPUT_SIZES[env_name]
+    input_tensor_accumulated = torch.empty((0, input_size), dtype=torch.float32)
+    output_tensor_accumulated = torch.empty((0, 2), dtype=torch.float32)
+
+    last_action = 0 # the last action taken
+    last_state = np.array([]) # the last state before an action was taken
+    state_action_history = np.array([]) # a history of state,action every time feedback was given
+    feedback_history = np.array([]) # a history of binary feedbacks
+    time_data = np.array([]) # the timestamp of every action starting at 0
+    full_obs_data = [] # every state action data ever, even if feedback not provided
     can_go = True
+    action_ind = 0
 
     def on_press(key):
         nonlocal state_action_history, feedback_history, can_go
+        nonlocal output_tensor_accumulated, input_tensor_accumulated
         if len(full_obs_data) == 0:
             print("Slow down! Haven't even started playing yet.")
             return
@@ -169,20 +133,84 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
         state_action = make_state_action(last_state, last_action, env_name)
         state_action_history = np.append(state_action_history, state_action)
         feedback_history = np.append(feedback_history, feedback)
+
         if env_name == MOUNTAIN_CAR_MODE:
             # how much time passed since first frame
             # and the time the  feedback was recorded
             feedback_delta = (time.now() - start_time).total_seconds()
-            train_network_w_gamma(net, full_obs_data, feedback, time_data, feedback_delta)
-            # TODO : Train snake w/gamma
+            input_tensor, output_tensor = \
+                make_training_data_with_gamma(full_obs_data, feedback, time_data, feedback_delta)
+            output_tensor_accumulated = torch.cat((output_tensor_accumulated, output_tensor), 0)
+            input_tensor_accumulated = torch.cat((input_tensor_accumulated, input_tensor), 0)
         else:
-            train_network(net, state_action, feedback)
+            input_tensor, output_tensor = \
+                make_training_data(state_action, feedback)
+            output_tensor_accumulated = torch.cat((output_tensor_accumulated, output_tensor), 0)
+            input_tensor_accumulated = torch.cat((input_tensor_accumulated, input_tensor), 0)
+            pass
 
         can_go = True
 
     # start a keyboard listener
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
+
+    run_continuously = True
+
+    if env_name == MOUNTAIN_CAR_MODE:
+        if human_render:
+            env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE, render_mode='human'), frame_limit)
+        else:
+            env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE), frame_limit)
+    else:
+        pass
+        # TODO : OTHER GAMES
+
+
+    total_reward = 0
+    last_state, _ = env.reset()
+    # play the game until terminated
+    done = False
+    start_time = time.now()
+    while not done:
+        # take the next action from action_history
+        last_action = int(action_history[action_ind])
+        action_ind += 1
+        print("action", last_action)
+        last_state, current_reward, terminated, truncated, info = env.step(last_action)
+        done = terminated or truncated
+        total_reward += current_reward
+        state_action = make_state_action(last_state, last_action, env_name)
+        full_obs_data.append(state_action)
+        # how much time passed since first frame
+        delta = (time.now() - start_time).total_seconds()
+        time_data = np.append(time_data, delta)
+        if (not run_continuously) and (current_agent_index in wait_agents):
+            can_go = False
+        while not can_go:
+            tm.sleep(1)
+
+    if env_name == TTT_MODE:
+        env.show_result(human_render, total_reward)
+
+    # stop the keyboard listener
+    listener.stop()
+    listener.join()
+
+    output_dict = { "states": state_action_history, "feedback": feedback_history }
+    print(input_tensor_accumulated, output_tensor_accumulated)
+    return input_tensor_accumulated, output_tensor_accumulated
+
+def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True):
+    '''
+    Use the network to predict actions but do not use any listeners for feedback.
+    No training takes place during this run. Only we thing we need to keep track of
+    is what actions are taken.
+    '''
+
+    last_action = 0
+    action_history = np.array([])
+    can_go = True
 
     def get_invalid_actions(inputs):
         invalids = np.zeros(ACTION_SIZES[env_name])
@@ -194,9 +222,6 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
             print(idx)
             if idx is not None:
                 invalids[idx] = 1
-        if env_name == MOUNTAIN_CAR_MODE:
-            # make it so the car has to go left or right.
-            invalids[1] = 1
 
         return invalids
 
@@ -234,45 +259,25 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
         # argmax using .item() and feed that into the environment
         current_agent_index = (current_agent_index + 1) % len(agents)  # len(agents) = 1 when in single-agent game
         last_action = agents[current_agent_index](last_state)
-        # print(action)
         last_state, current_reward, terminated, truncated, info = env.step(last_action)
         done = terminated or truncated
         total_reward += current_reward
-        state_action = make_state_action(last_state, last_action, env_name)
-        full_obs_data.append(state_action)
-        # how much time passed since first frame
-        delta = (time.now() - start_time).total_seconds()
-        time_data = np.append(time_data, delta)
+        action_history = np.append(action_history, last_action)
         if (not run_continuously) and (current_agent_index in wait_agents):
+            # wait a second so people have time to process
             can_go = False
-        while not can_go:
-            tm.sleep(1)
+            tm.sleep(2)
+            can_go = True
 
     if env_name == TTT_MODE:
         env.show_result(human_render, total_reward)
 
-    # stop the keyboard listener
-    listener.stop()
-    listener.join()
+    return action_history
 
-    output_dict = { "states": state_action_history, "feedback": feedback_history }
-    return output_dict
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('--num_plays', default=5, type=int, help="number of play runs to collect")
-    parser.add_argument('--mode', default=DEFAULT_MODE, type=str, help="Which game to do")
-    parser.add_argument('--snake_max_fps', default=10, type=int, help="max fps at which snake game should run")
-    parser.add_argument('--frame_limit', default=200, type=int, help="number of frames before episode cuts off")
-    #parser.add_argument('--num_evals', default=6, type=int, help="number of times to run policy after training for evaluation")
-    args = parser.parse_args()
-
-    net = Net(args.mode)
-    for i in range(args.num_plays):
-        data = collect_live_data(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.snake_max_fps)
-        print("Data for run " + str(i + 1) + ":\n" + str(data))
-
-    #data=offline_wrapper(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.snake_max_fps)
-    #print(data)
-    # collect human
+def offline_wrapper(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True):
+    for i in range(5):
+        print("running with no feedback")
+        action_history = offline_no_feedback_run(net, env_name, frame_limit, snake_max_fps, human_render)
+        print("running again, please give feedback")
+        indata, outdata = offline_collect_feedback(net, env_name, action_history, frame_limit, snake_max_fps, human_render)
+        train_network(net, indata, outdata)
