@@ -1,10 +1,8 @@
 import random
 import sys
 import time
-
 import gym
 import argparse
-import pygame
 import torch
 from torch.optim import Adam
 import torch.nn as nn
@@ -18,82 +16,14 @@ from environment.GLOBALS import *
 from environment.SnakeWrapper import SnakeWrapper
 from environment.TTTWrapper import TTTWrapper
 from networks.Network import Net
-from networks.RewardNetwork import *
 from scipy.stats import gamma
 from datetime import datetime as time
 import time as tm
 from environment.MountainCarWrapper import MountainCarWrapper
+from training.format_data import make_state_action, make_training_data, make_training_data_with_gamma
+from training.train_network import train_network
 
 device = torch.device('cpu')
-
-def train_network(net, input, output):
-    optimizer = Adam(net.parameters(), lr=0.2)
-    loss_criterion = nn.CrossEntropyLoss()
-    optimizer.zero_grad()
-    #run action,state through policy to get predicted logits for classifying action
-    pred_action_logits = net.predict(input)
-    #now compute loss
-    loss = loss_criterion(pred_action_logits, output)
-    #back propagate the error through the network
-    loss.backward()
-    #perform update on policy parameters
-    optimizer.step()
-    print("Updating network")
-
-def make_training_data(input, output):
-
-    input_tensor = torch.as_tensor(input, dtype=torch.float32)
-    output_one_hot = np.zeros(2)
-    output_one_hot[output] = 1
-    output_tensor = torch.as_tensor(output_one_hot)
-
-    return(input_tensor, output_tensor)
-
-def make_state_action(state, action, mode):
-    '''
-    Takes in the state as obs np array
-    and the action as an integer
-    returns np array of state and one-hot encoded action
-    '''
-    # one hot encode the actions
-    n_actions = ACTION_SIZES[mode]
-    one_hot_action = np.zeros(n_actions)
-    one_hot_action[action] = 1
-    # append the state, actions to obs_data
-    state_action = np.append(state, one_hot_action)
-
-    return state_action
-
-def make_training_data_with_gamma(state_action_data, feedback, time_data, feedback_delta):
-    '''
-    This is the same function as train in online, but instead of training we just
-    save the input and output data for later
-    '''
-    alpha = MOUNTAIN_CAR_GAMMA['alpha']
-    loc = MOUNTAIN_CAR_GAMMA['loc']
-    scale = MOUNTAIN_CAR_GAMMA['scale']
-    state_action_data = np.asarray(state_action_data)
-
-    time_data_mod = np.copy(time_data)
-    time_data_mod = np.append(time_data_mod, feedback_delta)
-    time_data_mod = time_data_mod[-1]-time_data_mod
-    n = len(time_data_mod)
-
-    credits = gamma.cdf(time_data_mod[0: n-1], alpha, loc, scale) \
-            - gamma.cdf(time_data_mod[1: n], alpha, loc, scale)
-
-    credits_cutoff_ind = np.argmax(credits>GAMMA_CREDIT_CUTOFF)
-    credits = credits[credits_cutoff_ind:]
-    state_action_data = state_action_data[credits_cutoff_ind:]
-
-    network_output = np.zeros((len(credits), 2))
-    network_output[:, feedback] = credits
-
-    input_tensor = torch.as_tensor(state_action_data, dtype=torch.float32).reshape(state_action_data.shape[0], -1)
-    output_tensor = torch.as_tensor(network_output).reshape(network_output.shape[0], -1)
-
-    return(input_tensor, output_tensor)
-
 
 def offline_collect_feedback(net, env_name, action_history, frame_limit=200, snake_max_fps=20, human_render=True):
     input_size = MODE_INPUT_SIZES[env_name]
