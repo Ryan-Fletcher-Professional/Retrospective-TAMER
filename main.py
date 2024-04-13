@@ -269,4 +269,6 @@ if __name__ == "__main__":
         data = collect_live_data(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.snake_max_fps)
         print("Data for run " + str(i + 1) + ":\n" + str(data))
 
-    # collect human demos
+    #data=offline_wrapper(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.snake_max_fps)
+    #print(data)
+    # collect human
