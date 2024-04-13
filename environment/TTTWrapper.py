@@ -12,8 +12,8 @@ class TTTWrapper(gym.Wrapper):
         self.frame_limit = frame_limit
         self.frames = 0
         self.human_render = human_render
+        self.starting_state = starting_state
         if starting_state is not None:
-            self.starting_state = starting_state
             self.env.state = starting_state
 
     def reset(self):

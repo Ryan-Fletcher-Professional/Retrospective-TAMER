@@ -1,22 +1,12 @@
 import random
-import sys
 import time
 import gym
-import argparse
-import torch
-from torch.optim import Adam
-import torch.nn as nn
 import numpy as np
-import torch.nn.functional as F
 from pynput import keyboard
-import environment.snake_gym
-from environment.gym_tictactoe.gym_tictactoe.env import TicTacToeEnv, agent_by_mark, check_game_status,\
-    after_action_state, tomark, next_mark
+from environment.gym_tictactoe.gym_tictactoe.env import TicTacToeEnv
 from environment.GLOBALS import *
 from environment.SnakeWrapper import SnakeWrapper
 from environment.TTTWrapper import TTTWrapper
-from networks.Network import Net
-from scipy.stats import gamma
 from datetime import datetime as time
 import time as tm
 from environment.MountainCarWrapper import MountainCarWrapper
@@ -64,13 +54,12 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
         state_action = make_state_action(last_state, last_action, env_name)
         state_action_history = np.append(state_action_history, state_action)
         feedback_history = np.append(feedback_history, feedback)
-        if env_name == MOUNTAIN_CAR_MODE:
+        if (env_name == MOUNTAIN_CAR_MODE) or (env_name == SNAKE_MODE):
             # how much time passed since first frame
             # and the time the  feedback was recorded
             feedback_delta = (time.now() - start_time).total_seconds()
             input_tensor, output_tensor = \
                 make_training_data_with_gamma(full_obs_data, feedback, time_data, feedback_delta)
-            # TODO : Train snake w/gamma
         else:
             input_tensor, output_tensor = \
                 make_training_data(state_action, feedback)
@@ -117,11 +106,12 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
         run_continuously = False
     elif env_name == SNAKE_MODE:
         env = SnakeWrapper(gym.make(env_name), frame_limit, snake_max_fps)  # Snake game does not use env.render() so we can't make it not render
-    elif env_name == "snake-v0":
-        print("!!!!!!!!\tWARNING: Do you mean to play snake-tiled-v0?\t!!!!!!!!")
+    elif (env_name == "snake-v0") or (env_name == "snake-tiled-v0"):
+        print("!!!!!!!!\tError: Do you mean to play snake-custom-v0?\t!!!!!!!!")
+        return
     else:
         print("!!!!!!!!\tError: No valid environment name\t!!!!!!!!")
-
+        return
     total_reward = 0
     last_state, _ = env.reset()
     # play the game until terminated

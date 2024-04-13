@@ -1,10 +1,8 @@
 import math
-import random
 import gym
 import numpy as np
 import time
-
-from environment.snake_gym_custom.envs.SnakeEnvCustom import SnakeGame
+from environment.snake_gym_custom.snake_gym_custom.envs.SnakeEnvCustom import SnakeGame
 
 
 class SnakeWrapper(gym.Wrapper):
@@ -18,8 +16,8 @@ class SnakeWrapper(gym.Wrapper):
         # self.growing = False
         if render_mode is not None:
             self.env.env.render_yn = render_mode
+        self.starting_state = starting_state
         if starting_state is not None:
-            self.starting_state = starting_state
             self.env.state = starting_state
 
     def flatten(self, state):

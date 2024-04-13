@@ -9,13 +9,13 @@ import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 from pynput import keyboard
-import environment.snake_gym
+from networks.Network import Net
 from environment.gym_tictactoe.gym_tictactoe.env import TicTacToeEnv, agent_by_mark, check_game_status,\
     after_action_state, tomark, next_mark
+from environment.snake_gym_custom.snake_gym_custom.envs import SnakeEnvCustom
 from environment.GLOBALS import *
 from environment.SnakeWrapper import SnakeWrapper
 from environment.TTTWrapper import TTTWrapper
-from networks.Network import Net
 from scipy.stats import gamma
 from datetime import datetime as time
 import time as tm
