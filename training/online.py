@@ -58,6 +58,7 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
             # how much time passed since first frame
             # and the time the  feedback was recorded
             feedback_delta = (time.now() - start_time).total_seconds()
+
             input_tensor, output_tensor = \
                 make_training_data_with_gamma(full_obs_data, feedback, time_data, feedback_delta)
         else:
@@ -105,7 +106,7 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
         agents.append(lambda _: random.choice(env.available_actions()))
         run_continuously = False
     elif env_name == SNAKE_MODE:
-        env = SnakeWrapper(gym.make(env_name), frame_limit, snake_max_fps)  # Snake game does not use env.render() so we can't make it not render
+        env = SnakeWrapper(gym.make(env_name), 'human' if human_render else None, frame_limit, snake_max_fps)  # Snake game does not use env.render() so we can't make it not render
     elif (env_name == "snake-v0") or (env_name == "snake-tiled-v0"):
         print("!!!!!!!!\tError: Do you mean to play snake-custom-v0?\t!!!!!!!!")
         return

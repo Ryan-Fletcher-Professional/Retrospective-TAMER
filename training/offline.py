@@ -152,7 +152,10 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
             print(idx)
             if idx is not None:
                 invalids[idx] = 1
-
+        if env_name == MOUNTAIN_CAR_MODE:
+            # make it so the car has to go left or right.
+            invalids[1] = 1
+            
         return invalids
 
     agents = [lambda net_input: net.predict_max_action(net_input, get_invalid_actions(net_input))]

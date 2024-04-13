@@ -41,6 +41,6 @@ if __name__ == "__main__":
     for i in range(args.num_plays):
         data = online.collect_live_data(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.snake_max_fps)
         print("Data for run " + str(i + 1) + ":\n" + str(data))
-        # data=offline_wrapper(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.snake_max_fps)
+        #data=offline_wrapper(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.snake_max_fps)
         # print(data)
         # collect human

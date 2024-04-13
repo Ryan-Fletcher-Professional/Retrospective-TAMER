@@ -51,20 +51,25 @@ def make_training_data_with_gamma(state_action_data, feedback, time_data, feedba
     # use gamma function to decide on how feedback credits should be assigned
     credits = gamma.cdf(time_data_mod[0: n-1], alpha, loc, scale) \
             - gamma.cdf(time_data_mod[1: n], alpha, loc, scale)
-
+    print("-------------------credits before cutoff", credits)
     # for an almost 0 credit, better to not pass it to network at all
     # find the index of that credit cutoff
     credits_cutoff_ind = np.argmax(credits>GAMMA_CREDIT_CUTOFF)
     credits = credits[credits_cutoff_ind:]
+    print("-------------------credits after cutoff 1", credits)
+
     # this scales the credits so the max is 1
     credits/= max(credits)
     # use the credit cutoff for the network input data as well
     state_action_data = state_action_data[credits_cutoff_ind:]
+
     # also cut off the right tail where everything is 0 because its under
     # our estimated minimum human reaction time
-    credits_cutoff_ind = np.argmax(credits==0)
-    credits = credits[:credits_cutoff_ind]
-    state_action_data = state_action_data[:credits_cutoff_ind]
+    if 0 in credits:
+        credits_cutoff_ind = np.argmax(credits==0)
+        credits = credits[:credits_cutoff_ind]
+        state_action_data = state_action_data[:credits_cutoff_ind]
+
     # convert this where each credit is [0, credit] or [credit, 0] depending
     # on feedback
     network_output = np.zeros((len(credits), 2))
@@ -72,7 +77,6 @@ def make_training_data_with_gamma(state_action_data, feedback, time_data, feedba
 
     input_tensor = torch.as_tensor(state_action_data, dtype=torch.float32).reshape(state_action_data.shape[0], -1)
     output_tensor = torch.as_tensor(network_output).reshape(network_output.shape[0], -1)
-
     return(input_tensor, output_tensor)
 
 
