@@ -9,7 +9,7 @@ from pygame.locals import *
 class SnakeEnvCustom(gym.Env):
     metadata = {"render_modes": ["human"], "render_fps": 60}
 
-    def __init__(self):
+    def __init__(self, starting_state=None):
         self.observation_space = spaces.Box(low=0, high=3, shape=[10, 10])
         self._action_set = [x for x in range(4)]
         self.action_space = spaces.Discrete(4)
@@ -20,7 +20,7 @@ class SnakeEnvCustom(gym.Env):
         self.clock = pygame.time.Clock()
         self.size = 10
         self.render_yn = "human"
-        self.s = SnakeGame(self.size)
+        self.s = SnakeGame(self.size, starting_state=starting_state)
 
     def step(self, action):
         return self.s.step(action)
@@ -71,12 +71,12 @@ class SnakeGame:
     RIGHT = np.array((1, 0))
     ACTIONS = [UP, DOWN, LEFT, RIGHT]
 
-    def __init__(self, size, human_render=True):
+    def __init__(self, size, human_render=True, starting_state=None):
         self.size = size
         grid = np.zeros((10, 10))
-        apple_coords = (random.randint(0, size - 1), random.randint(0, size - 1))
+        apple_coords = (random.randint(0, size - 1), random.randint(0, size - 1)) if (starting_state is None) else starting_state[0]
         grid[apple_coords[0], apple_coords[1]] = -1
-        snake_coords = apple_coords
+        snake_coords = apple_coords if (starting_state is None) else starting_state[1]
         while snake_coords == apple_coords:
             snake_coords = (random.randint(0, size - 1), random.randint(0, size - 1))
         grid[snake_coords[0], snake_coords[1]] = 1

@@ -8,7 +8,7 @@ from environment.snake_gym_custom.envs.SnakeEnvCustom import SnakeGame
 
 
 class SnakeWrapper(gym.Wrapper):
-    def __init__(self, env, render_mode, frame_limit=200, max_fps=math.inf):
+    def __init__(self, env, render_mode, frame_limit=200, max_fps=math.inf, starting_state=None):
         super().__init__(env)
         self.max_fps = max_fps
         self.last_step_time = time.time()
@@ -18,6 +18,9 @@ class SnakeWrapper(gym.Wrapper):
         # self.growing = False
         if render_mode is not None:
             self.env.env.render_yn = render_mode
+        if starting_state is not None:
+            self.starting_state = starting_state
+            self.env.state = starting_state
 
     def flatten(self, state):
         print(state)
@@ -32,7 +35,10 @@ class SnakeWrapper(gym.Wrapper):
         self.frames = 0
         # self.last_frame = np.zeros(self.last_frame.shape)
         self.growing = False
-        return self.flatten(super().reset()), {}
+        ret = self.flatten(super().reset()), {}
+        if self.starting_state is not None:
+            self.env.state = self.starting_state
+        return ret
 
     def step(self, action):
         while (time.time() - self.last_step_time) < (1 / self.max_fps):
