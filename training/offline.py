@@ -155,7 +155,7 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
         if env_name == MOUNTAIN_CAR_MODE:
             # make it so the car has to go left or right.
             invalids[1] = 1
-            
+
         return invalids
 
     agents = [lambda net_input: net.predict_max_action(net_input, get_invalid_actions(net_input))]
@@ -208,9 +208,8 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
     return action_history
 
 def offline_wrapper(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True):
-    for i in range(5):
-        print("running with no feedback")
-        action_history = offline_no_feedback_run(net, env_name, frame_limit, snake_max_fps, human_render)
-        print("running again, please give feedback")
-        indata, outdata = offline_collect_feedback(net, env_name, action_history, frame_limit, snake_max_fps, human_render)
-        train_network(net, indata, outdata)
+    print("running with no feedback")
+    action_history = offline_no_feedback_run(net, env_name, frame_limit, snake_max_fps, human_render)
+    print("running again, please give feedback")
+    indata, outdata = offline_collect_feedback(net, env_name, action_history, frame_limit, snake_max_fps, human_render)
+    train_network(net, indata, outdata)
