@@ -176,8 +176,8 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
         run_continuously = False
     elif env_name == SNAKE_MODE:
         env = SnakeWrapper(gym.make(env_name), frame_limit, snake_max_fps)  # Snake game does not use env.render() so we can't make it not render
-    elif env_name == "snake-v0":
-        print("!!!!!!!!\tWARNING: Do you mean to play snake-tiled-v0?\t!!!!!!!!")
+    elif (env_name == "snake-v0") or (env_name == "snake-tiled-v0"):
+        print("!!!!!!!!\tWARNING: Do you mean to play snake-custom-v0?\t!!!!!!!!")
     else:
         print("!!!!!!!!\tError: No valid environment name\t!!!!!!!!")
 
