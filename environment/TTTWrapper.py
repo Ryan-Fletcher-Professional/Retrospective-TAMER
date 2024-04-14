@@ -4,7 +4,7 @@ import numpy as np
 
 
 class TTTWrapper(gym.Wrapper):
-    def __init__(self, env, start_mark, frame_limit=200, human_render=True, starting_state=None):
+    def __init__(self, env, start_mark, frame_limit=200, human_render=True):
         super().__init__(env)
         self.current_agent_index = 0
         self.current_mark = start_mark
@@ -12,18 +12,12 @@ class TTTWrapper(gym.Wrapper):
         self.frame_limit = frame_limit
         self.frames = 0
         self.human_render = human_render
-        self.starting_state = starting_state
-        if starting_state is not None:
-            self.env.state = starting_state
 
     def reset(self):
         new_set = super().reset()
         self.current_mark = new_set[1]
         self.frames = 0
-        ret = new_set[0], new_set[1]
-        if self.starting_state is not None:
-            self.env.state = self.starting_state
-        return ret
+        return new_set[0], new_set[1]
 
     def step(self, action):
         self.env.show_turn(self.human_render, self.current_mark)
