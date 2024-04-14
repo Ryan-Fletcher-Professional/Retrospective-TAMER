@@ -39,10 +39,10 @@ if __name__ == "__main__":
 
     net = Net(args.mode)
     for i in range(args.num_plays):
-        if args.feedback_mode=="online":
+        if args.feedback_mode == "online":
             data = online.collect_live_data(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.fps)
             print("Data for run " + str(i + 1) + ":\n" + str(data))
-        elif args.feedback_mode=="offline":
+        elif args.feedback_mode == "offline":
             offline_wrapper(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.fps)
             print("Didn't collect data, but offline run " + str(i + 1) + " complete.")
         

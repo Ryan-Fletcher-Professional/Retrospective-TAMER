@@ -86,7 +86,7 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
     listener = keyboard.Listener(on_press=on_press)
     listener.start()
 
-    run_continuously = True
+    run_continuously = env_name != TTT_MODE
 
     total_reward = 0
     last_state, _ = env.reset()  # This reset will automatically set the start state to be the same as the first time
@@ -94,8 +94,8 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
     done = False
     start_time = time.now()
 
-    agents = ["random", "env"]
-    wait_agents = [1]
+    agents = ["env", "random"]
+    wait_agents = [0]
     current_agent_index = 0
 
     while not done:
@@ -136,7 +136,6 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
     is what actions are taken.
     '''
 
-    last_action = 0
     action_history = np.array([])
     can_go = True
 
@@ -155,6 +154,13 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
             invalids[1] = 1
 
         return invalids
+
+    def on_press(key):
+        nonlocal can_go
+        can_go = True
+
+    listener = keyboard.Listener(on_press=on_press)
+    listener.start()
 
     agents = [lambda net_input: net.predict_max_action(net_input, get_invalid_actions(net_input))]
     current_agent_index = 0
@@ -196,11 +202,15 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
         total_reward += current_reward
         action_history = np.append(action_history, last_action)
         if (not run_continuously) and (current_agent_index in wait_agents):
-            # wait a second so people have time to process
-            tm.sleep(2)
+            can_go = False
+        while not can_go:
+            tm.sleep(1)
 
     if env_name == TTT_MODE:
         env.show_result(human_render, total_reward)
+
+    listener.stop()
+    listener.join()
 
     return action_history, env
 
