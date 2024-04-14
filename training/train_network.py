@@ -6,7 +6,7 @@ def train_network(net, input, output):
     Takes correctly formatted input and output tensors and
     trains the given network
     '''
-    print(input.numpy(), output.numpy())
+    # print(input.numpy(), output.numpy())
 
     optimizer = Adam(net.parameters(), lr=0.2)
     loss_criterion = nn.CrossEntropyLoss()

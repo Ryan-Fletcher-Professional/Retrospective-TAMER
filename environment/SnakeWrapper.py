@@ -6,7 +6,7 @@ from environment.snake_gym_custom.snake_gym_custom.envs.SnakeEnvCustom import Sn
 
 
 class SnakeWrapper(gym.Wrapper):
-    def __init__(self, env, render_mode, frame_limit=200, max_fps=math.inf, starting_state=None):
+    def __init__(self, env, render_mode, frame_limit=200, max_fps=math.inf):
         super().__init__(env)
         self.max_fps = max_fps
         self.last_step_time = time.time()
@@ -16,12 +16,9 @@ class SnakeWrapper(gym.Wrapper):
         # self.growing = False
         if render_mode is not None:
             self.env.env.render_yn = render_mode
-        self.starting_state = starting_state
-        if starting_state is not None:
-            self.env.state = starting_state
+        self.starting_state = None
 
     def flatten(self, state):
-        print(state)
         # flattened_obs = np.zeros(np.prod(state.shape) * 3)
         # for i in range(len(state)):  # Transforms observations into 1-hot-encoded inputs for the network
         #     for j in range(len(state[i])):
@@ -35,10 +32,13 @@ class SnakeWrapper(gym.Wrapper):
         self.growing = False
         ret = self.flatten(super().reset()), {}
         if self.starting_state is not None:
-            self.env.state = self.starting_state
+            self.env.s.last_frame = np.copy(self.starting_state)
+            ret = self.flatten(self.env.s.get_last_frame()), {}
         return ret
 
     def step(self, action):
+        if self.starting_state is None:
+            self.starting_state = np.copy(self.env.s.last_frame)
         while (time.time() - self.last_step_time) < (1 / self.max_fps):
             time.sleep(1 / 1000)
         obs, reward, done, info = self.env.step(action)

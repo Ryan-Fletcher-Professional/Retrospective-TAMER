@@ -25,7 +25,8 @@ from training.train_network import train_network
 
 device = torch.device('cpu')
 
-def offline_collect_feedback(net, env_name, action_history, frame_limit=200, snake_max_fps=20, human_render=True):
+
+def offline_collect_feedback(net, env_name, action_history, frame_limit=200, snake_max_fps=20, human_render=True, env=None):
     input_size = MODE_INPUT_SIZES[env_name]
     input_tensor_accumulated = torch.empty((0, input_size), dtype=torch.float32)
     output_tensor_accumulated = torch.empty((0, 2), dtype=torch.float32)
@@ -87,26 +88,22 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
 
     run_continuously = True
 
-    if env_name == MOUNTAIN_CAR_MODE:
-        if human_render:
-            env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE, render_mode='human'), frame_limit)
-        else:
-            env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE), frame_limit)
-    else:
-        pass
-        # TODO : OTHER GAMES
-
-
     total_reward = 0
-    last_state, _ = env.reset()
+    last_state, _ = env.reset()  # This reset will automatically set the start state to be the same as the first time
     # play the game until terminated
     done = False
     start_time = time.now()
+
+    agents = ["random", "env"]
+    wait_agents = [1]
+    current_agent_index = 0
+
     while not done:
         # take the next action from action_history
+        current_agent_index = (current_agent_index + 1) % len(agents)  # len(agents) = 1 when in single-agent game
         last_action = int(action_history[action_ind])
         action_ind += 1
-        print("action", last_action)
+        # print("action", last_action)
         last_state, current_reward, terminated, truncated, info = env.step(last_action)
         done = terminated or truncated
         total_reward += current_reward
@@ -131,6 +128,7 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
     print(input_tensor_accumulated, output_tensor_accumulated)
     return input_tensor_accumulated, output_tensor_accumulated
 
+
 def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True):
     '''
     Use the network to predict actions but do not use any listeners for feedback.
@@ -149,7 +147,7 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
                 invalids[j] = 1 if inputs[j * 3] == 0 else 0  # First logit for each square is the 'empty square' logit
         if env_name == SNAKE_MODE:
             idx = env.get_invalid_move()
-            print(idx)
+            # print(idx)
             if idx is not None:
                 invalids[idx] = 1
         if env_name == MOUNTAIN_CAR_MODE:
@@ -175,17 +173,18 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
         agents.append(lambda _: random.choice(env.available_actions()))
         run_continuously = False
     elif env_name == SNAKE_MODE:
-        env = SnakeWrapper(gym.make(env_name), frame_limit, snake_max_fps)  # Snake game does not use env.render() so we can't make it not render
+        env = SnakeWrapper(gym.make(env_name), 'human' if human_render else None, frame_limit=frame_limit, max_fps=snake_max_fps)  # Snake game does not use env.render() so we can't make it not render
     elif (env_name == "snake-v0") or (env_name == "snake-tiled-v0"):
-        print("!!!!!!!!\tWARNING: Do you mean to play snake-custom-v0?\t!!!!!!!!")
+        print("!!!!!!!!\tError: Do you mean to play snake-custom-v0?\t!!!!!!!!")
+        return
     else:
         print("!!!!!!!!\tError: No valid environment name\t!!!!!!!!")
+        return
 
     total_reward = 0
     last_state, _ = env.reset()
     # play the game until terminated
     done = False
-    start_time = time.now()
     while not done:
         # take the action that the network assigns the highest logit value to
         # Note that first we convert from numpy to tensor and then we get the value of the
@@ -198,18 +197,17 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
         action_history = np.append(action_history, last_action)
         if (not run_continuously) and (current_agent_index in wait_agents):
             # wait a second so people have time to process
-            can_go = False
             tm.sleep(2)
-            can_go = True
 
     if env_name == TTT_MODE:
         env.show_result(human_render, total_reward)
 
-    return action_history
+    return action_history, env
 
 def offline_wrapper(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True):
-    print("running with no feedback")
-    action_history = offline_no_feedback_run(net, env_name, frame_limit, snake_max_fps, human_render)
-    print("running again, please give feedback")
-    indata, outdata = offline_collect_feedback(net, env_name, action_history, frame_limit, snake_max_fps, human_render)
-    train_network(net, indata, outdata)
+    for i in range(5):
+        print("running with no feedback")
+        action_history, env = offline_no_feedback_run(net, env_name, frame_limit, snake_max_fps, human_render)
+        print("running again, please give feedback")
+        indata, outdata = offline_collect_feedback(net, env_name, action_history, frame_limit, snake_max_fps, human_render, env=env)
+        train_network(net, indata, outdata)

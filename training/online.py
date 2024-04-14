@@ -80,7 +80,6 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
                 invalids[j] = 1 if inputs[j * 3] == 0 else 0  # First logit for each square is the 'empty square' logit
         if env_name == SNAKE_MODE:
             idx = env.get_invalid_move()
-            print(idx)
             if idx is not None:
                 invalids[idx] = 1
         if env_name == MOUNTAIN_CAR_MODE:
