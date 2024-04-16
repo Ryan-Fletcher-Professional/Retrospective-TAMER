@@ -1,7 +1,7 @@
 TTT_SIZE = 3
 SNAKE_GRID_DIMS = (10, 10)
 
-MOUNTAIN_CAR_MODE = "MountainCar-v0"
+MOUNTAIN_CAR_MODE = "MountainCarCustom-v0"
 MOUNTAIN_CAR_STATE_SIZE = 2
 MOUNTAIN_CAR_ACTION_SIZE = 3
 
@@ -40,3 +40,7 @@ DEFAULT_POLICY_SIZES[SNAKE_MODE] = _layer_safe([MODE_INPUT_SIZES[SNAKE_MODE],
                                                 _snake_bulge_layer_size,
                                                 (_snake_bulge_layer_size + FEEDBACK_SIZE) / 2,
                                                 FEEDBACK_SIZE])
+
+MOUNTAINCAR_PRACTICE_NUM_RUNS = 3
+NUM_PRACTICE_RUNS = 2
+NUM_REAL_RUNS = 5

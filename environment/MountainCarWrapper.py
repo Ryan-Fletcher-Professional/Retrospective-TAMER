@@ -1,4 +1,5 @@
-import random
+import math
+
 import gym
 import numpy as np
 
@@ -7,7 +8,7 @@ class MountainCarWrapper(gym.Wrapper):
     def __init__(self, env, frame_limit=200, human_render=True):
         super().__init__(env)
         self.env = self.env.env  # Should bypass default frame limit
-        self.current_agent_index = 0
+        self.current_agent_index = 0  # TODO : Remove???
         self.frame_limit = frame_limit
         self.frames = 0
         self.human_render = human_render
