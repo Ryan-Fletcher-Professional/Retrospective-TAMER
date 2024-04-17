@@ -210,11 +210,11 @@ def run_script_live(num_practice, num_real, save_net, mc_net=None, ttt_net=None,
     for _ in range(num_practice):
         display_message_screen(WAIT_PRACTICE)
         # live_feedback(copy(mc_net)) TODO : Implement net copy method so that practice runs don't change anything. Run collect live and discard results.
-    for _ in range(num_real):
+    for i in range(num_real):
         display_message_screen(WAIT_REAL)
         # live_feedback(mc_net)  TODO : Run collect live s.t. it alters net's parameters.
         if save_net:
-            pass  # save(mc_net, num_real + 1)  TODO : Implement save net method
+            pass  # save(mc_net, i + 1)  TODO : Implement save net method
 
     if ttt_net is None:
         ttt_net = Net(TTT_MODE)
@@ -222,11 +222,11 @@ def run_script_live(num_practice, num_real, save_net, mc_net=None, ttt_net=None,
     for _ in range(num_practice):
         display_message_screen(WAIT_PRACTICE)
         # live_feedback(copy(ttt_net)) TODO : Implement net copy method so that practice runs don't change anything. Run collect live and discard results.
-    for _ in range(num_real):
+    for i in range(num_real):
         display_message_screen(WAIT_REAL)
         # live_feedback(ttt_net)  TODO : Run collect live s.t. it alters net's parameters.
         if save_net:
-            pass  # save(ttt_net, num_real + 1)  TODO : Implement save net method
+            pass  # save(ttt_net, i + 1)  TODO : Implement save net method
 
     if snake_net is None:
         snake_net = Net(SNAKE_MODE)
@@ -234,11 +234,11 @@ def run_script_live(num_practice, num_real, save_net, mc_net=None, ttt_net=None,
     for _ in range(num_practice):
         display_message_screen(WAIT_PRACTICE)
         # live_feedback(copy(snake_net)) TODO : Implement net copy method so that practice runs don't change anything. Run collect live and discard results.
-    for _ in range(num_real):
+    for i in range(num_real):
         display_message_screen(WAIT_REAL)
         # live_feedback(snake_net)  TODO : Run collect live s.t. it alters net's parameters.
         if save_net:
-            pass  # save(snake_net, num_real + 1)  TODO : Implement save net method
+            pass  # save(snake_net, i + 1)  TODO : Implement save net method
 
     display_message_screen(OUTRO)
 
@@ -369,13 +369,13 @@ def run_script_retrospective(num_practice, num_real, save_net, mc_net=None, ttt_
         # run = show_run(copy(mc_net))  TODO : Implement net copy method so that practice runs don't change anything. Implement action replay.
         display_message_screen(WAIT_FEEDBACK)
         # retrospective_feedback(run, copy(mc_net)) TODO : Run collect retrospective and discard results.
-    for _ in range(num_real):
+    for i in range(num_real):
         display_message_screen(WAIT_REAL)
         # run = show_run(mc_net)  TODO : Implement action replay.
         display_message_screen(WAIT_FEEDBACK)
         # retrospective_feedback(run, mc_net) TODO : Run collect retrospective s.t. it alters net's parameters.
         if save_net:
-            pass  # save(mc_net, num_real + 1)  TODO : Implement save net method
+            pass  # save(mc_net, i + 1)  TODO : Implement save net method
 
     if ttt_net is None:
         ttt_net = Net(TTT_MODE)
@@ -385,13 +385,13 @@ def run_script_retrospective(num_practice, num_real, save_net, mc_net=None, ttt_
         # run = show_run(copy(ttt_net))  TODO : Implement net copy method so that practice runs don't change anything. Implement action replay.
         display_message_screen(WAIT_FEEDBACK)
         # retrospective_feedback(run, copy(ttt_net)) TODO : Run collect retrospective and discard results.
-    for _ in range(num_real):
+    for i in range(num_real):
         display_message_screen(WAIT_REAL)
         # run = show_run(ttt_net)  TODO : Implement action replay.
         display_message_screen(WAIT_FEEDBACK)
         # retrospective_feedback(run, ttt_net) TODO : Run collect retrospective s.t. it alters net's parameters.
         if save_net:
-            pass  # save(ttt_net, num_real + 1)  TODO : Implement save net method
+            pass  # save(ttt_net, i + 1)  TODO : Implement save net method
 
     if snake_net is None:
         snake_net = Net(SNAKE_MODE)
@@ -401,13 +401,13 @@ def run_script_retrospective(num_practice, num_real, save_net, mc_net=None, ttt_
         # run = show_run(copy(snake_net))  TODO : Implement net copy method so that practice runs don't change anything. Implement action replay.
         display_message_screen(WAIT_FEEDBACK)
         # retrospective_feedback(run, copy(snake_net)) TODO : Run collect retrospective and discard results.
-    for _ in range(num_real):
+    for i in range(num_real):
         display_message_screen(WAIT_REAL)
         # run = show_run(snake_net)  TODO : Implement action replay.
         display_message_screen(WAIT_FEEDBACK)
         # retrospective_feedback(run, snake_net) TODO : Run collect retrospective s.t. it alters net's parameters.
         if save_net:
-            pass  # save(snake_net, num_real + 1)  TODO : Implement save net method
+            pass  # save(snake_net, i + 1)  TODO : Implement save net method
 
     display_message_screen(OUTRO)
 
