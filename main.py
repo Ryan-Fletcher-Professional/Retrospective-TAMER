@@ -213,8 +213,8 @@ def run_script_live(num_practice, num_real, save_net, mc_net=None, ttt_net=None,
     for _ in range(num_real):
         display_message_screen(WAIT_REAL)
         # live_feedback(mc_net)  TODO : Run collect live s.t. it alters net's parameters.
-    if save_net:
-        pass  # save(mc_net)  TODO : Implement save net method
+        if save_net:
+            pass  # save(mc_net, num_real + 1)  TODO : Implement save net method
 
     if ttt_net is None:
         ttt_net = Net(TTT_MODE)
@@ -225,8 +225,8 @@ def run_script_live(num_practice, num_real, save_net, mc_net=None, ttt_net=None,
     for _ in range(num_real):
         display_message_screen(WAIT_REAL)
         # live_feedback(ttt_net)  TODO : Run collect live s.t. it alters net's parameters.
-    if save_net:
-        pass  # save(ttt_net)  TODO : Implement save net method
+        if save_net:
+            pass  # save(ttt_net, num_real + 1)  TODO : Implement save net method
 
     if snake_net is None:
         snake_net = Net(SNAKE_MODE)
@@ -237,8 +237,8 @@ def run_script_live(num_practice, num_real, save_net, mc_net=None, ttt_net=None,
     for _ in range(num_real):
         display_message_screen(WAIT_REAL)
         # live_feedback(snake_net)  TODO : Run collect live s.t. it alters net's parameters.
-    if save_net:
-        pass  # save(snake_net)  TODO : Implement save net method
+        if save_net:
+            pass  # save(snake_net, num_real + 1)  TODO : Implement save net method
 
     display_message_screen(OUTRO)
 
@@ -374,8 +374,8 @@ def run_script_retrospective(num_practice, num_real, save_net, mc_net=None, ttt_
         # run = show_run(mc_net)  TODO : Implement action replay.
         display_message_screen(WAIT_FEEDBACK)
         # retrospective_feedback(run, mc_net) TODO : Run collect retrospective s.t. it alters net's parameters.
-    if save_net:
-        pass  # save(mc_net)  TODO : Implement save net method
+        if save_net:
+            pass  # save(mc_net, num_real + 1)  TODO : Implement save net method
 
     if ttt_net is None:
         ttt_net = Net(TTT_MODE)
@@ -390,8 +390,8 @@ def run_script_retrospective(num_practice, num_real, save_net, mc_net=None, ttt_
         # run = show_run(ttt_net)  TODO : Implement action replay.
         display_message_screen(WAIT_FEEDBACK)
         # retrospective_feedback(run, ttt_net) TODO : Run collect retrospective s.t. it alters net's parameters.
-    if save_net:
-        pass  # save(ttt_net)  TODO : Implement save net method
+        if save_net:
+            pass  # save(ttt_net, num_real + 1)  TODO : Implement save net method
 
     if snake_net is None:
         snake_net = Net(SNAKE_MODE)
@@ -406,8 +406,8 @@ def run_script_retrospective(num_practice, num_real, save_net, mc_net=None, ttt_
         # run = show_run(snake_net)  TODO : Implement action replay.
         display_message_screen(WAIT_FEEDBACK)
         # retrospective_feedback(run, snake_net) TODO : Run collect retrospective s.t. it alters net's parameters.
-    if save_net:
-        pass  # save(snake_net)  TODO : Implement save net method
+        if save_net:
+            pass  # save(snake_net, num_real + 1)  TODO : Implement save net method
 
     display_message_screen(OUTRO)
 
@@ -420,7 +420,7 @@ if __name__ == "__main__":
     parser.add_argument('--frame_limit', default=200, type=int, help="number of frames before episode cuts off")
     parser.add_argument('--feedback_mode', default="online", type=str, help="online/offline : how feedback will be given? Ignored if using a script.")
     parser.add_argument('--script', default=None, type=str, help="practice/live/retrospective/all")
-    parser.add_argument('--save_net', default=False, type=bool, help="Whether to save sheckpoint and result networks in live and retrospective scripts.")
+    parser.add_argument('--save_nets', default=False, type=bool, help="Whether to save checkpoint and result networks in live and retrospective scripts.")
     args = parser.parse_args()
 
     scripts = [args.script]
