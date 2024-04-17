@@ -42,5 +42,6 @@ DEFAULT_POLICY_SIZES[SNAKE_MODE] = _layer_safe([MODE_INPUT_SIZES[SNAKE_MODE],
                                                 FEEDBACK_SIZE])
 
 MOUNTAINCAR_PRACTICE_NUM_RUNS = 3
-NUM_PRACTICE_RUNS = 2
+NUM_PRACTICE_RUNS_LIVE = 2
+NUM_PRACTICE_RUNS_RETROSPECTIVE = 1  # Since they can't see improvement anyway
 NUM_REAL_RUNS = 5
