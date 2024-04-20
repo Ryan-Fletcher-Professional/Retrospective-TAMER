@@ -51,15 +51,16 @@ def make_training_data_with_gamma(state_action_data, feedback, time_data, feedba
     # use gamma function to decide on how feedback credits should be assigned
     credits = gamma.cdf(time_data_mod[0: n-1], alpha, loc, scale) \
             - gamma.cdf(time_data_mod[1: n], alpha, loc, scale)
-    print("-------------------credits before cutoff", credits)
+    #print("-------------------credits before cutoff", credits)
     # for an almost 0 credit, better to not pass it to network at all
     # find the index of that credit cutoff
     credits_cutoff_ind = np.argmax(credits>GAMMA_CREDIT_CUTOFF)
     credits = credits[credits_cutoff_ind:]
-    print("-------------------credits after cutoff 1", credits)
 
     # this scales the credits so the max is 1
     credits/= max(credits)
+    #print("-------------------credits after cutoff and scaling", credits)
+
     # use the credit cutoff for the network input data as well
     state_action_data = state_action_data[credits_cutoff_ind:]
 
