@@ -58,7 +58,8 @@ def make_training_data_with_gamma(state_action_data, feedback, time_data, feedba
     credits = credits[credits_cutoff_ind:]
 
     # this scales the credits so the max is 1
-    credits/= max(credits)
+    if max(credits)!=0:
+        credits/= max(credits)
     #print("-------------------credits after cutoff and scaling", credits)
 
     # use the credit cutoff for the network input data as well

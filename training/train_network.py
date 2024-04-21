@@ -19,4 +19,4 @@ def train_network(net, input, output):
     loss.backward()
     #perform update on policy parameters
     optimizer.step()
-    print("Updating network. Input: ", input.numpy(), "\nOutput: ", output.numpy())
+    #print("Updating network. Input: ", input.numpy(), "\nOutput: ", output.numpy())
