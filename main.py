@@ -421,11 +421,20 @@ if __name__ == "__main__":
     parser.add_argument('--feedback_mode', default="online", type=str, help="online/offline : how feedback will be given? Ignored if using a script.")
     parser.add_argument('--script', default=None, type=str, help="practice/live/retrospective/all")
     parser.add_argument('--save_nets', default=False, type=bool, help="Whether to save checkpoint and result networks in live and retrospective scripts.")
+    parser.add_argument('--load_network', default=None, type=str, help="path to a saved network to load")
+    parser.add_argument('--save_network', default=None, type=str, help="where to save the trained network after the game is complete")
+
     args = parser.parse_args()
 
     scripts = [args.script]
     if scripts[0] is None:
         net = Net(args.mode)
+        if args.load_network:
+            try:
+                print("Loading network from", args.load_network)
+                net.load_state_dict(torch.load(args.load_network))
+            except Exception as e:
+                print("Could not load network. Error: ", e)
         for i in range(args.num_plays):
             if args.feedback_mode == "online":
                 data = online.collect_live_data(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.fps)
@@ -433,6 +442,10 @@ if __name__ == "__main__":
             elif args.feedback_mode == "offline":
                 offline_wrapper(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.fps)
                 print("Didn't collect data, but offline run " + str(i + 1) + " complete.")
+        # save the resulting network
+        if args.save_network:
+            print("Saving trained network at ", args.save_network)
+            torch.save(net.state_dict(), args.save_network)
     elif scripts[0] == 'all':
         scripts = ['practice', 'live', 'retrospective']
         if random.randint(0, 1) == 1:
