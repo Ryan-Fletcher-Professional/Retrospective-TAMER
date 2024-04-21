@@ -265,7 +265,7 @@ class MountainCarEnvCustom(gym.Env):
         )
 
         if self.last_action != NO_MOVEMENT:
-            arrow_color = (255, 0, 0)
+            arrow_color = (0, 0, 255)
             world_width = self.max_position - self.min_position
             scale = self.screen_width / world_width
             pos = self.state[0]
@@ -280,7 +280,7 @@ class MountainCarEnvCustom(gym.Env):
                 arrow_end = arrow_start
 
             if arrow_start != arrow_end:
-                print("START: ", arrow_start, " END: ", arrow_end)
+                #print("START: ", arrow_start, " END: ", arrow_end)
                 gfxdraw.filled_polygon(self.surf, [(arrow_start[0], arrow_start[1] - (carheight / 2)), (arrow_start[0], arrow_start[1] + (carheight / 2)), arrow_end], arrow_color)
 
         self.surf = pygame.transform.flip(self.surf, False, True)

@@ -48,7 +48,7 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
                 return
         except Exception as e:
             print("WRONG INPUT! Press 'c' or 'v'")
-            print("Exception: ", e)
+            #print("Exception: ", e)
             return
 
         state_action = make_state_action(last_state, last_action, env_name)

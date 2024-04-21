@@ -4,7 +4,7 @@ import sys
 import pygame
 from environment.mountain_car_practice.teleop import play
 from environment.mountain_car_practice.MountainCarWrapperDowngrade import MountainCarWrapperDowngrade
-from training import online
+from training import online, offline
 from training.offline import offline_wrapper
 
 sys.path.append(os.getcwd() + "/environment")
@@ -72,7 +72,7 @@ def display_message_screen(message):
     root.mainloop()
 
 
-def run_script_practice(num_runs):
+def run_script_practice(num_runs, frame_limit):
     INTRO_MESSAGE =\
         """
         After this screen, you will immediately see the Mountain Car game, which consists of a little car in a valley.
@@ -89,7 +89,7 @@ def run_script_practice(num_runs):
         Press the Enter key to continue.
         """
 
-    print("RUNNING PRACTICE SCRIPT")
+    #print("RUNNING PRACTICE SCRIPT")
 
     display_message_screen(INTRO_MESSAGE)
 
@@ -99,7 +99,8 @@ def run_script_practice(num_runs):
         play(env, keys_to_action=mapping)
 
 
-def run_script_live(num_practice, num_real, save_net, mc_net=None, ttt_net=None, snake_net=None):
+def run_script_live(num_practice, num_real, frame_limit, fps,
+                    mc_load=None, mc_save=None, ttt_load=None, ttt_save=None, snake_load=None, snake_save=None):
     INTRO_MESSAGE_1 =\
         """
         In this experiment, you will be presented with three games:
@@ -145,7 +146,7 @@ def run_script_live(num_practice, num_real, save_net, mc_net=None, ttt_net=None,
         
         Press the 'c' key when the AI makes a suboptimal move and press the 'v' key when the AI makes an optimal move.
         
-        When your AI is accelerating the Mountain Car, it will have a red arrow next to it, pointing
+        When your AI is accelerating the Mountain Car, it will have a blue arrow next to it, pointing
         in the direction of acceleration. This should make it easier to give accurate feedback.
         
         This game moves many times per second. You don't need to give feedback at every time
@@ -204,46 +205,87 @@ def run_script_live(num_practice, num_real, save_net, mc_net=None, ttt_net=None,
     display_message_screen(INTRO_MESSAGE_1)
     display_message_screen(INTRO_MESSAGE_2)
 
-    if mc_net is None:
-        mc_net = Net(MOUNTAIN_CAR_MODE)
     display_message_screen(MC_RULES)
     for _ in range(num_practice):
         display_message_screen(WAIT_PRACTICE)
-        # live_feedback(copy(mc_net)) TODO : Implement net copy method so that practice runs don't change anything. Run collect live and discard results.
+        mc_net = Net(MOUNTAIN_CAR_MODE)
+        if mc_load is not None:
+            try:
+                #print("Loading network from", mc_load)
+                mc_net.load_state_dict(torch.load(mc_load))
+            except Exception as e:
+                print("Could not load network. Error: ", e)
+        online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, frame_limit, fps, True)
+        pygame.quit()
+    mc_net = Net(MOUNTAIN_CAR_MODE)
+    if mc_load is not None:
+        try:
+            #print("Loading network from", mc_load)
+            mc_net.load_state_dict(torch.load(mc_load))
+        except Exception as e:
+            print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        # live_feedback(mc_net)  TODO : Run collect live s.t. it alters net's parameters.
-        if save_net:
-            pass  # save(mc_net, i + 1)  TODO : Implement save net method
+        online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, frame_limit, fps, True)
+        pygame.quit()
+        if mc_save is not None:
+            torch.save(mc_net, mc_save + f"/mc_{i+1}.pt")
 
-    if ttt_net is None:
-        ttt_net = Net(TTT_MODE)
     display_message_screen(TTT_RULES)
     for _ in range(num_practice):
         display_message_screen(WAIT_PRACTICE)
-        # live_feedback(copy(ttt_net)) TODO : Implement net copy method so that practice runs don't change anything. Run collect live and discard results.
+        ttt_net = Net(TTT_MODE)
+        if ttt_load is not None:
+            try:
+                #print("Loading network from", ttt_load)
+                ttt_net.load_state_dict(torch.load(ttt_load))
+            except Exception as e:
+                print("Could not load network. Error: ", e)
+        online.collect_live_data(ttt_net, TTT_MODE, frame_limit, fps, True)
+    ttt_net = Net(TTT_MODE)
+    if ttt_load is not None:
+        try:
+            #print("Loading network from", ttt_load)
+            ttt_net.load_state_dict(torch.load(ttt_load))
+        except Exception as e:
+            print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        # live_feedback(ttt_net)  TODO : Run collect live s.t. it alters net's parameters.
-        if save_net:
-            pass  # save(ttt_net, i + 1)  TODO : Implement save net method
+        online.collect_live_data(ttt_net, TTT_MODE, frame_limit, fps, True)
+        if ttt_save is not None:
+            torch.save(ttt_net, ttt_save + f"/ttt_{i + 1}.pt")
 
-    if snake_net is None:
-        snake_net = Net(SNAKE_MODE)
     display_message_screen(SNAKE_RULES)
     for _ in range(num_practice):
         display_message_screen(WAIT_PRACTICE)
-        # live_feedback(copy(snake_net)) TODO : Implement net copy method so that practice runs don't change anything. Run collect live and discard results.
+        snake_net = Net(SNAKE_MODE)
+        if snake_load is not None:
+            try:
+                #print("Loading network from", snake_load)
+                snake_net.load_state_dict(torch.load(snake_load))
+            except Exception as e:
+                print("Could not load network. Error: ", e)
+        online.collect_live_data(snake_net, SNAKE_MODE, frame_limit, fps, True)
+        pygame.quit()
+    snake_net = Net(SNAKE_MODE)
+    if snake_load is not None:
+        try:
+            #print("Loading network from", snake_load)
+            snake_net.load_state_dict(torch.load(snake_load))
+        except Exception as e:
+            print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        # live_feedback(snake_net)  TODO : Run collect live s.t. it alters net's parameters.
-        if save_net:
-            pass  # save(snake_net, i + 1)  TODO : Implement save net method
+        online.collect_live_data(snake_net, SNAKE_MODE, frame_limit, fps, True)
+        pygame.quit()
+        if snake_save is not None:
+            torch.save(snake_net, snake_save + f"/snake_{i + 1}.pt")
 
     display_message_screen(OUTRO)
 
 
-def run_script_retrospective(num_practice, num_real, save_net, mc_net=None, ttt_net=None, snake_net=None):
+def run_script_retrospective(num_practice, num_real, frame_limit, fps,
+                             mc_load=None, mc_save=None, ttt_load=None, ttt_save=None, snake_load=None, snake_save=None):
     INTRO_MESSAGE_1 = \
         """
         In this experiment, you will be presented with three games:
@@ -273,7 +315,7 @@ def run_script_retrospective(num_practice, num_real, save_net, mc_net=None, ttt_
         Before each practice or training run, you'll be presented with a waiting screen.
         Once you're ready there, press the Enter key to continue to the run.
         Then you'll see your AI playing the game. Don't give any feedback yet.
-        Once you've seen the entire game, including how well the AI did, you'll be presented with another waiting screen.
+        Once you've seen the entire game, you'll be presented with another waiting screen.
         After you press the Enter key to advance past that screen, you'll see the same run again, and now you should give feedback!
         The AI will not actively incorporate your feedback as you're giving it, but the AI will incorporate your feedback
         before the next run.
@@ -293,7 +335,7 @@ def run_script_retrospective(num_practice, num_real, save_net, mc_net=None, ttt_
         When giving feedback:
         Press the 'c' key when the AI makes a suboptimal move and press the 'v' key when the AI makes an optimal move.
 
-        When your AI is accelerating the Mountain Car, it will have a red arrow next to it, pointing
+        When your AI is accelerating the Mountain Car, it will have a blue arrow next to it, pointing
         in the direction of acceleration. This should make it easier to give accurate feedback.
 
         This game moves many times per second. You don't need to give feedback at every time
@@ -352,87 +394,136 @@ def run_script_retrospective(num_practice, num_real, save_net, mc_net=None, ttt_
         Remember, don't give feedback yet; just pay attention to what your Ai does.
         """
 
-    OUTRO =\
-        """
-        All done.
-        Thanks for participating in our experiment!
-        """
-
     display_message_screen(INTRO_MESSAGE_1)
     display_message_screen(INTRO_MESSAGE_2)
 
-    if mc_net is None:
-        mc_net = Net(MOUNTAIN_CAR_MODE)
     display_message_screen(MC_RULES)
     for _ in range(num_practice):
         display_message_screen(WAIT_PRACTICE)
-        # run = show_run(copy(mc_net))  TODO : Implement net copy method so that practice runs don't change anything. Implement action replay.
+        mc_net = Net(MOUNTAIN_CAR_MODE)
+        if mc_load is not None:
+            try:
+                #print("Loading network from", mc_load)
+                mc_net.load_state_dict(torch.load(mc_load))
+            except Exception as e:
+                print("Could not load network. Error: ", e)
+        action_history, env = offline.offline_no_feedback_run(mc_net, MOUNTAIN_CAR_MODE, frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        # retrospective_feedback(run, copy(mc_net)) TODO : Run collect retrospective and discard results.
+        indata, outdata = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, frame_limit, fps,
+                                                   True, env=env)
+        pygame.quit()
+        offline.train_network(mc_net, indata, outdata)
+    mc_net = Net(MOUNTAIN_CAR_MODE)
+    if mc_load is not None:
+        try:
+            #print("Loading network from", mc_load)
+            mc_net.load_state_dict(torch.load(mc_load))
+        except Exception as e:
+            print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        # run = show_run(mc_net)  TODO : Implement action replay.
+        action_history, env = offline.offline_no_feedback_run(mc_net, MOUNTAIN_CAR_MODE, frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        # retrospective_feedback(run, mc_net) TODO : Run collect retrospective s.t. it alters net's parameters.
-        if save_net:
-            pass  # save(mc_net, i + 1)  TODO : Implement save net method
+        indata, outdata = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, frame_limit, fps,
+                                                           True, env=env)
+        pygame.quit()
+        offline.train_network(mc_net, indata, outdata)
+        if mc_save is not None:
+            torch.save(mc_net.state_dict(), mc_save + f"/mc_{i+1}.pt")
 
-    if ttt_net is None:
-        ttt_net = Net(TTT_MODE)
     display_message_screen(TTT_RULES)
     for _ in range(num_practice):
         display_message_screen(WAIT_PRACTICE)
-        # run = show_run(copy(ttt_net))  TODO : Implement net copy method so that practice runs don't change anything. Implement action replay.
+        ttt_net = Net(TTT_MODE)
+        if ttt_load is not None:
+            try:
+                #print("Loading network from", ttt_load)
+                ttt_net.load_state_dict(torch.load(ttt_load))
+            except Exception as e:
+                print("Could not load network. Error: ", e)
+        action_history, env = offline.offline_no_feedback_run(ttt_net, TTT_MODE, frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        # retrospective_feedback(run, copy(ttt_net)) TODO : Run collect retrospective and discard results.
+        indata, outdata = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, frame_limit, fps,
+                                                           True, env=env)
+        offline.train_network(ttt_net, indata, outdata)
+    ttt_net = Net(TTT_MODE)
+    if ttt_load is not None:
+        try:
+            #print("Loading network from", ttt_load)
+            ttt_net.load_state_dict(torch.load(ttt_load))
+        except Exception as e:
+            print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        # run = show_run(ttt_net)  TODO : Implement action replay.
+        action_history, env = offline.offline_no_feedback_run(ttt_net, TTT_MODE, frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        # retrospective_feedback(run, ttt_net) TODO : Run collect retrospective s.t. it alters net's parameters.
-        if save_net:
-            pass  # save(ttt_net, i + 1)  TODO : Implement save net method
+        indata, outdata = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, frame_limit, fps,
+                                                           True, env=env)
+        offline.train_network(ttt_net, indata, outdata)
+        if ttt_save is not None:
+            torch.save(ttt_net.state_dict(), ttt_save + f"/ttt_{i+1}.pt")
 
-    if snake_net is None:
-        snake_net = Net(SNAKE_MODE)
     display_message_screen(SNAKE_RULES)
     for _ in range(num_practice):
         display_message_screen(WAIT_PRACTICE)
-        # run = show_run(copy(snake_net))  TODO : Implement net copy method so that practice runs don't change anything. Implement action replay.
+        snake_net = Net(SNAKE_MODE)
+        if snake_load is not None:
+            try:
+                #print("Loading network from", snake_load)
+                snake_net.load_state_dict(torch.load(snake_load))
+            except Exception as e:
+                print("Could not load network. Error: ", e)
+        action_history, env = offline.offline_no_feedback_run(snake_net, SNAKE_MODE, frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        # retrospective_feedback(run, copy(snake_net)) TODO : Run collect retrospective and discard results.
+        indata, outdata = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, frame_limit, fps,
+                                                           True, env=env)
+        pygame.quit()
+        offline.train_network(snake_net, indata, outdata)
+    snake_net = Net(SNAKE_MODE)
+    if snake_load is not None:
+        try:
+            #print("Loading network from", snake_load)
+            snake_net.load_state_dict(torch.load(snake_load))
+        except Exception as e:
+            print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        # run = show_run(snake_net)  TODO : Implement action replay.
+        action_history, env = offline.offline_no_feedback_run(snake_net, SNAKE_MODE, frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        # retrospective_feedback(run, snake_net) TODO : Run collect retrospective s.t. it alters net's parameters.
-        if save_net:
-            pass  # save(snake_net, i + 1)  TODO : Implement save net method
-
-    display_message_screen(OUTRO)
+        indata, outdata = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, frame_limit, fps,
+                                                           True, env=env)
+        pygame.quit()
+        offline.train_network(snake_net, indata, outdata)
+        if snake_save is not None:
+            torch.save(snake_net.state_dict(), snake_save + f"/snake_{i+1}.pt")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=None)
-    parser.add_argument('--num_plays', default=5, type=int, help="number of play runs to collect")
+    parser.add_argument('--num_plays', default=5, type=int, help="number of play runs to collect. Ignored if script is used.")
     parser.add_argument('--mode', default=DEFAULT_MODE, type=str, help="Which game to do. Ignored if using a script.")
     parser.add_argument('--fps', default=10, type=int, help="max fps at which snake game should run")
     parser.add_argument('--frame_limit', default=200, type=int, help="number of frames before episode cuts off")
     parser.add_argument('--feedback_mode', default="online", type=str, help="online/offline : how feedback will be given? Ignored if using a script.")
     parser.add_argument('--script', default=None, type=str, help="practice/live/retrospective/all")
-    parser.add_argument('--save_nets', default=False, type=bool, help="Whether to save checkpoint and result networks in live and retrospective scripts.")
-    parser.add_argument('--load_network', default=None, type=str, help="path to a saved network to load")
-    parser.add_argument('--save_network', default=None, type=str, help="where to save the trained network after the game is complete")
+    parser.add_argument('--load_net', default=None, type=str, help="path to a saved network to load. Ignored if script is given.")
+    parser.add_argument('--save_net', default=None, type=str, help="directory in which to save the trained network after the game is complete. Ignored if script is given.")
+    parser.add_argument('--load_mc', default=None, type=str, help="path to a saved mountaincar network to load")
+    parser.add_argument('--save_mc', default=None, type=str, help="directory in which to save the trained MountainCar network after the game is complete")
+    parser.add_argument('--load_ttt', default=None, type=str, help="path to a saved tictactoe network to load")
+    parser.add_argument('--save_ttt', default=None, type=str, help="directory in which to save the trained tictactoe network after the game is complete")
+    parser.add_argument('--load_snake', default=None, type=str, help="path to a saved snake network to load")
+    parser.add_argument('--save_snake', default=None, type=str, help="directory in which to save the trained snake network after the game is complete")
 
     args = parser.parse_args()
 
     scripts = [args.script]
     if scripts[0] is None:
         net = Net(args.mode)
-        if args.load_network:
+        if args.load_net is not None:
             try:
-                print("Loading network from", args.load_network)
-                net.load_state_dict(torch.load(args.load_network))
+                print("Loading network from", args.load_net)
+                net.load_state_dict(torch.load(args.load_net))
             except Exception as e:
                 print("Could not load network. Error: ", e)
         for i in range(args.num_plays):
@@ -443,18 +534,30 @@ if __name__ == "__main__":
                 offline_wrapper(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.fps)
                 print("Didn't collect data, but offline run " + str(i + 1) + " complete.")
         # save the resulting network
-        if args.save_network:
-            print("Saving trained network at ", args.save_network)
-            torch.save(net.state_dict(), args.save_network)
+        if args.save_net is not None:
+            print("Saving trained network at ", args.save_net)
+            torch.save(net.state_dict(), args.save_net)
     elif scripts[0] == 'all':
         scripts = ['practice', 'live', 'retrospective']
         if random.randint(0, 1) == 1:
-            scripts[1], scripts[2] = scripts[2], scripts[1]  # To account for IV that is order of experiments
-    else:
+            scripts[1], scripts[2] = scripts[2], scripts[1]  # To account for independent variable that is order of experiments
+    if scripts[0] is not None:
         for script in scripts:
             if script == 'practice':
-                run_script_practice(MOUNTAINCAR_PRACTICE_NUM_RUNS)
+                run_script_practice(MOUNTAINCAR_PRACTICE_NUM_RUNS, args.frame_limit)
             elif script == 'live':
-                run_script_live(NUM_PRACTICE_RUNS_LIVE, NUM_REAL_RUNS, args.save_net)
+                run_script_live(NUM_PRACTICE_RUNS_LIVE, NUM_REAL_RUNS, args.frame_limit, args.fps,
+                                mc_load=args.load_mc, mc_save=args.save_mc,
+                                ttt_load=args.load_ttt, ttt_save=args.save_ttt,
+                                snake_load=args.load_snake, snake_save=args.save_snake)
             elif script == 'retrospective':
-                run_script_retrospective(NUM_PRACTICE_RUNS_RETROSPECTIVE, NUM_REAL_RUNS, args.save_net)
+                run_script_retrospective(NUM_PRACTICE_RUNS_RETROSPECTIVE, NUM_REAL_RUNS, args.frame_limit, args.fps,
+                                         mc_load=args.load_mc, mc_save=args.save_mc,
+                                         ttt_load=args.load_ttt, ttt_save=args.save_ttt,
+                                         snake_load=args.load_snake, snake_save=args.save_snake)
+        OUTRO = \
+            """
+            All done.
+            Thanks for participating in our experiment!
+            """
+        display_message_screen(OUTRO)

@@ -50,6 +50,7 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
             # c for negative feedback
             if key.char == 'c':
                 feedback = 0
+
             # v for positive feedback
             elif key.char == 'v':
                 feedback = 1
@@ -58,7 +59,7 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
                 return
         except Exception as e:
             print("WRONG INPUT! Press 'c' or 'v'")
-            print("Exception: ", e)
+            #print("Exception: ", e)
             return
 
         state_action = make_state_action(last_state, last_action, env_name)
@@ -125,7 +126,7 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
     listener.join()
 
     output_dict = { "states": state_action_history, "feedback": feedback_history }
-    print(input_tensor_accumulated, output_tensor_accumulated)
+    #print(input_tensor_accumulated, output_tensor_accumulated)
     return input_tensor_accumulated, output_tensor_accumulated
 
 
@@ -216,6 +217,7 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
     listener.join()
 
     return action_history, env
+
 
 def offline_wrapper(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True):
     for i in range(5):

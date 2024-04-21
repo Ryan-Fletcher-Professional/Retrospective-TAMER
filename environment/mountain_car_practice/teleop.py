@@ -261,7 +261,7 @@ def play(
                 break
             started = True
             done = False
-            print("total reward", total_reward)
+            #print("total reward", total_reward)
             total_reward = 0
             obs = env.reset(seed=seed)
         else:
@@ -527,7 +527,7 @@ def collect_demos(
     while episodes < num_demos:
         if done:
             done = False
-            print("total reward", total_reward)
+            #print("total reward", total_reward)
             total_reward = 0
             episodes += 1
             obs = env.reset(seed=seed)
