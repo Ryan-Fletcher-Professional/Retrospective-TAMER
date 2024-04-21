@@ -2,6 +2,7 @@ import math
 import gym
 import numpy as np
 import time
+from environment.GLOBALS import *
 from environment.snake_gym_custom.snake_gym_custom.envs.SnakeEnvCustom import SnakeGame
 
 
@@ -30,32 +31,55 @@ class SnakeWrapper(gym.Wrapper):
         self.frames = 0
         # self.last_frame = np.zeros(self.last_frame.shape)
         self.growing = False
-        ret = self.flatten(super().reset()), {}
+        #ret = self.flatten(super().reset()), {}
+        super().reset()
+        ret = np.zeros(SNAKE_STATE_SIZE), {}
         if self.starting_state is not None:
             self.env.s.last_frame = np.copy(self.starting_state)
-            ret = self.flatten(self.env.s.get_last_frame()), {}
+            #ret = self.flatten(self.env.s.get_last_frame()), {}
         return ret
 
     def step(self, action):
         if self.starting_state is None:
             self.starting_state = np.copy(self.env.s.last_frame)
         while (time.time() - self.last_step_time) < (1 / self.max_fps):
-            time.sleep(1 / 1000)
-        obs, reward, done, info = self.env.step(action)
+            time.sleep(1 / 1000)                #                          {0, 1, 2} - 1
+                                                # step with ACTIONS[current + {-1,0,1}] = {turn left, go forward, turn right}
+        obs, reward, done, info = self.env.step((self.env.s.last_action_index + (action - 1)) % len(SnakeGame.ACTIONS))
         self.env.render()
         self.last_step_time = time.time()
         self.frames += 1
         truncated = False
         if (self.frames >= self.frame_limit) and not done:
             truncated = True
-        return self.flatten(obs), reward, done, truncated, info
+        # return self.flatten(obs), reward, done, truncated, info
+        # https://8thlight.com/insights/qlearning-teaching-ai-to-play-snake : state array under "Game Loop"
+        head_pos = np.array(np.unravel_index(np.argmax(self.env.s.last_frame, axis=None), self.env.s.last_frame.shape))
+        left_square = obs[(head_pos[0] + SnakeGame.ACTIONS[self.env.s.last_action_index - 1][0]) % obs.shape[0],
+                          (head_pos[1] + SnakeGame.ACTIONS[self.env.s.last_action_index - 1][1]) % obs.shape[1]]
+        forward_square = obs[(head_pos[0] + SnakeGame.ACTIONS[self.env.s.last_action_index][0]) % obs.shape[0],
+                             (head_pos[1] + SnakeGame.ACTIONS[self.env.s.last_action_index][1]) % obs.shape[1]]
+        right_square = obs[(head_pos[0] + SnakeGame.ACTIONS[(self.env.s.last_action_index + 1) % len(SnakeGame.ACTIONS)][0]) % obs.shape[0],
+                           (head_pos[1] + SnakeGame.ACTIONS[(self.env.s.last_action_index + 1) % len(SnakeGame.ACTIONS)][1]) % obs.shape[1]]
+        dirs = np.array([1 if self.env.s.last_action_index == i else 0 for i in range(len(SnakeGame.ACTIONS))])
+            # UP, RIGHT, DOWN, LEFT
+        food_up = 1 if (self.env.s.get_apple_location()[1] - head_pos[1]) < 0 else 0
+        food_right = 1 if (self.env.s.get_apple_location()[0] - head_pos[0]) > 0 else 0
+        food_down = 1 if (self.env.s.get_apple_location()[1] - head_pos[1]) > 0 else 0
+        food_left = 1 if (self.env.s.get_apple_location()[0] - head_pos[0]) < 0 else 0
+        analysis = np.array([left_square > 0, forward_square > 0, right_square > 0,
+                             dirs[0], dirs[1],    dirs[2],   dirs[3],
+                             food_up, food_right, food_down, food_left])
+        return analysis, reward, done, truncated, info
 
     def get_invalid_move(self):
-        if np.max(self.env.s.last_frame) < 2:
-            return None
-        for i in range(len(SnakeGame.ACTIONS)):
-            action = SnakeGame.ACTIONS[i]
-            last_action = self.env.s.last_action
-            if ((action[0] != 0) and (last_action[0] != 0) and (action[0] == (last_action[0] * -1))) or\
-               ((action[1] != 0) and (last_action[1] != 0) and (action[1] == (last_action[1] * -1))):
-                return i
+        # This only applies if not using forward/left/right scheme
+        # if np.max(self.env.s.last_frame) < 2:
+        #     return None
+        # for i in range(len(SnakeGame.ACTIONS)):
+        #     action = SnakeGame.ACTIONS[i]
+        #     last_action = self.env.s.last_action
+        #     if ((action[0] != 0) and (last_action[0] != 0) and (action[0] == (last_action[0] * -1))) or\
+        #        ((action[1] != 0) and (last_action[1] != 0) and (action[1] == (last_action[1] * -1))):
+        #         return i
+        return None

@@ -52,7 +52,7 @@ class Net(nn.Module):
                 new_pred = self.predict(state_action)
                 new_pred_proba = nn.functional.softmax(new_pred, dim=0)
                 preds.append(new_pred_proba[1].item())
-                print(preds)
+                #print(preds)
         best_action_ind = np.argmax(np.asarray(preds))
         #print(line + "\n")
         return best_action_ind

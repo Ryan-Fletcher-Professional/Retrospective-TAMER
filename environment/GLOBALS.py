@@ -12,8 +12,8 @@ TTT_MODE = "tictactoe-v0"
 TTT_STATE_SIZE = (TTT_SIZE ** 2) * 3  # N*N squares, 3 possible logits for each square
 TTT_ACTION_SIZE = TTT_SIZE ** 2
 SNAKE_MODE = "snake-custom-v0"
-SNAKE_STATE_SIZE = (SNAKE_GRID_DIMS[0] * SNAKE_GRID_DIMS[1]) + 2  # With new env state is represented with scalar values plus the apple coords  #* 3  # N*M squares, 3 possible logits for each square
-SNAKE_ACTION_SIZE = 4
+SNAKE_STATE_SIZE = 11  # https://8thlight.com/insights/qlearning-teaching-ai-to-play-snake : state array under "Game Loop"  # (SNAKE_GRID_DIMS[0] * SNAKE_GRID_DIMS[1]) + 2  # With new env state is represented with scalar values plus the apple coords  #* 3  # N*M squares, 3 possible logits for each square
+SNAKE_ACTION_SIZE = 3  # Forward, left, right
 
 MODES = [MOUNTAIN_CAR_MODE, TTT_MODE, SNAKE_MODE]
 DEFAULT_MODE = MODES[0]
@@ -34,11 +34,15 @@ def _layer_safe(sizes: [int or float]):  # So we never accidentally make a layer
 FEEDBACK_SIZE = 2 # positive/negative
 DEFAULT_POLICY_SIZES = {mode: _layer_safe([MODE_INPUT_SIZES[mode], 32, MODE_OUTPUT_SIZES[mode]]) for mode in MODES}
 DEFAULT_POLICY_SIZES[MOUNTAIN_CAR_MODE] = _layer_safe([MODE_INPUT_SIZES[MOUNTAIN_CAR_MODE], 16, 16, FEEDBACK_SIZE])
-DEFAULT_POLICY_SIZES[TTT_MODE] = _layer_safe([MODE_INPUT_SIZES[TTT_MODE], 16, 16, FEEDBACK_SIZE])
-_snake_bulge_layer_size = _layer_safe([MODE_INPUT_SIZES[SNAKE_MODE] * 1.5])[0]
+DEFAULT_POLICY_SIZES[TTT_MODE] = _layer_safe([MODE_INPUT_SIZES[TTT_MODE], 16, 32, 16, FEEDBACK_SIZE])
+# _snake_bulge_layer_size = _layer_safe([MODE_INPUT_SIZES[SNAKE_MODE] * 1.5])[0]
+# DEFAULT_POLICY_SIZES[SNAKE_MODE] = _layer_safe([MODE_INPUT_SIZES[SNAKE_MODE],
+#                                                 _snake_bulge_layer_size,
+#                                                 (_snake_bulge_layer_size + FEEDBACK_SIZE) / 2,
+#                                                 FEEDBACK_SIZE])
 DEFAULT_POLICY_SIZES[SNAKE_MODE] = _layer_safe([MODE_INPUT_SIZES[SNAKE_MODE],
-                                                _snake_bulge_layer_size,
-                                                (_snake_bulge_layer_size + FEEDBACK_SIZE) / 2,
+                                                32, 64, 32,
+                                                MODE_INPUT_SIZES[SNAKE_MODE],
                                                 FEEDBACK_SIZE])
 
 MOUNTAINCAR_PRACTICE_NUM_RUNS = 3

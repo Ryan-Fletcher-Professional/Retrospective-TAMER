@@ -69,7 +69,7 @@ class SnakeGame:
     DOWN = np.array((0, 1))
     LEFT = np.array((-1, 0))
     RIGHT = np.array((1, 0))
-    ACTIONS = [UP, DOWN, LEFT, RIGHT]
+    ACTIONS = [UP, RIGHT, DOWN, LEFT]
 
     def __init__(self, size, human_render=True):
         self.size = size
@@ -83,7 +83,8 @@ class SnakeGame:
         self.last_frame = grid
         self.done = False
         self.human_render = human_render
-        self.last_action = SnakeGame.ACTIONS[0]
+        self.last_action_index = 0
+        self.last_action = SnakeGame.ACTIONS[self.last_action_index]
 
     def step(self, action):
         for event in pygame.event.get():
@@ -92,9 +93,9 @@ class SnakeGame:
                 self.done = True
 
         self.last_action = SnakeGame.ACTIONS[action]
+        self.last_action_index = action
 
         head_coords = np.array(np.unravel_index(np.argmax(self.last_frame, axis=None), self.last_frame.shape))
-
 
         apple_coords = np.array(np.unravel_index(np.argmin(self.last_frame, axis=None), self.last_frame.shape))
         new_head_coords = (head_coords + self.last_action) % self.size
