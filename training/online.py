@@ -10,10 +10,10 @@ from environment.TTTWrapper import TTTWrapper
 from datetime import datetime as time
 import time as tm
 from environment.MountainCarWrapper import MountainCarWrapper
-
+from playsound import playsound
 from training.format_data import make_state_action, make_training_data, make_training_data_with_gamma
 from training.train_network import train_network
-
+import pygame
 
 
 def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True):
@@ -39,9 +39,11 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
         try:
             # c for negative feedback
             if key.char == 'c':
+                playsound('./environment/sounds/' + POS_SOUND)
                 feedback = 0
             # v for positive feedback
             elif key.char == 'v':
+                playsound('./environment/sounds/' + NEG_SOUND)
                 feedback = 1
             else:
                 print("WRONG KEY! Press 'c' or 'v'")

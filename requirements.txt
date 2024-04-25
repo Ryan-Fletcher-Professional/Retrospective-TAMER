@@ -4,3 +4,4 @@ torch==2.2.0
 gym==0.26.2
 pynput==1.7.6
 scipy==1.11.4
+playsound==1.2.2
