@@ -26,13 +26,14 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
     last_action = 0
     last_state = np.array([])
     state_action_history = np.array([])
-    feedback_history = np.array([])
+    feedback_history = []
+    feedback_frame_ind = np.array([])
     time_data = np.array([])
     full_obs_data = []
     can_go = True
 
     def on_press(key):
-        nonlocal state_action_history, feedback_history, can_go
+        nonlocal state_action_history, feedback_history, feedback_frame_ind, can_go
         if len(full_obs_data) == 0:
             print("Slow down! Haven't even started playing yet.")
             return
@@ -55,17 +56,29 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
 
         state_action = make_state_action(last_state, last_action, env_name)
         state_action_history = np.append(state_action_history, state_action)
-        feedback_history = np.append(feedback_history, feedback)
+
+        # used for data logging purposes only
+        # takes into account that more frames may be produced
+        # while gamma credit calculations are happening
+        feedback_frame = len(full_obs_data)
+
         if (env_name == MOUNTAIN_CAR_MODE) or (env_name == SNAKE_MODE):
             # how much time passed since first frame
             # and the time the  feedback was recorded
             feedback_delta = (time.now() - start_time).total_seconds()
-
             input_tensor, output_tensor = \
                 make_training_data_with_gamma(full_obs_data, feedback, time_data, feedback_delta)
+            feedback_history += [output_tensor.numpy()]
         else:
             input_tensor, output_tensor = \
                 make_training_data(state_action, feedback)
+            feedback_history += [feedback]
+
+        # used for data logging purposes only
+        # multiply by negative one to make it clear
+        # that indexing is done from opposite end
+        feedback_frame_ind = np.append(feedback_frame_ind, -1*feedback_frame)
+
         # train network
         train_network(net, input_tensor, output_tensor)
 
@@ -146,5 +159,5 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
     listener.stop()
     listener.join()
 
-    output_dict = { "states": state_action_history, "feedback": feedback_history }
+    output_dict = { "state_actions": full_obs_data, "feedback": feedback_history, "feedback_inds" : feedback_frame_ind }
     return output_dict

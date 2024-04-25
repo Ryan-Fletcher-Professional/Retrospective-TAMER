@@ -61,7 +61,6 @@ def make_training_data_with_gamma(state_action_data, feedback, time_data, feedba
     if max(credits)!=0:
         credits/= max(credits)
     #print("-------------------credits after cutoff and scaling", credits)
-
     # use the credit cutoff for the network input data as well
     state_action_data = state_action_data[credits_cutoff_ind:]
 
@@ -79,6 +78,7 @@ def make_training_data_with_gamma(state_action_data, feedback, time_data, feedba
 
     input_tensor = torch.as_tensor(state_action_data, dtype=torch.float32).reshape(state_action_data.shape[0], -1)
     output_tensor = torch.as_tensor(network_output).reshape(network_output.shape[0], -1)
+
     return(input_tensor, output_tensor)
 
 
