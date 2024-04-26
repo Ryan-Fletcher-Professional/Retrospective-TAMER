@@ -32,7 +32,7 @@ def _layer_safe(sizes: [int or float]):  # So we never accidentally make a layer
     return [max(1, int(size)) for size in sizes]
 
 FEEDBACK_SIZE = 2 # positive/negative
-DEFAULT_POLICY_SIZES = {mode: _layer_safe([MODE_INPUT_SIZES[mode], 32, MODE_OUTPUT_SIZES[mode]]) for mode in MODES}
+DEFAULT_POLICY_SIZES = {mode: _layer_safe([MODE_INPUT_SIZES[mode], 32, FEEDBACK_SIZE]) for mode in MODES}
 DEFAULT_POLICY_SIZES[MOUNTAIN_CAR_MODE] = _layer_safe([MODE_INPUT_SIZES[MOUNTAIN_CAR_MODE], 16, 16, FEEDBACK_SIZE])
 DEFAULT_POLICY_SIZES[TTT_MODE] = _layer_safe([MODE_INPUT_SIZES[TTT_MODE], 16, 32, 16, FEEDBACK_SIZE])
 # _snake_bulge_layer_size = _layer_safe([MODE_INPUT_SIZES[SNAKE_MODE] * 1.5])[0]
@@ -48,7 +48,7 @@ DEFAULT_POLICY_SIZES[SNAKE_MODE] = _layer_safe([MODE_INPUT_SIZES[SNAKE_MODE],
 MOUNTAINCAR_PRACTICE_NUM_RUNS = 3
 NUM_PRACTICE_RUNS_LIVE = 2
 NUM_PRACTICE_RUNS_RETROSPECTIVE = 1  # Since they can't see improvement anyway
-NUM_REAL_RUNS = 5
+NUM_REAL_RUNS = 1  # 5
 
 POS_SOUND = 'start-13691.mp3'
 NEG_SOUND = 'bloop-1-184019.mp3'

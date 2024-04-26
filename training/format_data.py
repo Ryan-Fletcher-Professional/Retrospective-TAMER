@@ -89,8 +89,8 @@ def make_training_data(input, output):
     tensors.
     '''
     input_tensor = torch.as_tensor(input, dtype=torch.float32)
-    output_one_hot = np.zeros(2)
-    output_one_hot[output] = 1
+    output_one_hot = np.zeros((1, 2))
+    output_one_hot[0, output] = 1
     output_tensor = torch.as_tensor(output_one_hot)
 
-    return(input_tensor, output_tensor)
+    return(torch.unsqueeze(input_tensor, 0), output_tensor)

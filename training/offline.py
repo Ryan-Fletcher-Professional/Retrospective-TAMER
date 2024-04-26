@@ -28,8 +28,8 @@ device = torch.device('cpu')
 
 def offline_collect_feedback(net, env_name, action_history, frame_limit=200, snake_max_fps=20, human_render=True, env=None):
     input_size = MODE_INPUT_SIZES[env_name]
-    input_tensor_accumulated = torch.empty((0, input_size), dtype=torch.float32)
-    output_tensor_accumulated = torch.empty((0, 2), dtype=torch.float32)
+    input_tensor_accumulated = torch.empty((0,) if env_name == TTT_MODE else (0, input_size), dtype=torch.float32)
+    output_tensor_accumulated = torch.empty((0,) if env_name == TTT_MODE else (0, 2), dtype=torch.float32)
 
     last_action = 0 # the last action taken
     last_state = np.array([]) # the last state before an action was taken
@@ -50,7 +50,6 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
             # c for negative feedback
             if key.char == 'c':
                 feedback = 0
-
             # v for positive feedback
             elif key.char == 'v':
                 feedback = 1
@@ -79,7 +78,6 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
                 make_training_data(state_action, feedback)
             output_tensor_accumulated = torch.cat((output_tensor_accumulated, output_tensor), 0)
             input_tensor_accumulated = torch.cat((input_tensor_accumulated, input_tensor), 0)
-            pass
 
         can_go = True
 
