@@ -22,6 +22,7 @@ import time as tm
 from environment.MountainCarWrapper import MountainCarWrapper
 from training.format_data import make_state_action, make_training_data, make_training_data_with_gamma
 from training.train_network import train_network
+from playsound import playsound
 
 device = torch.device('cpu')
 
@@ -39,19 +40,25 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
     full_obs_data = [] # every state action data ever, even if feedback not provided
     can_go = True
     action_ind = 0
-
+    feedback_states_history = [] # keeps track of the states that had feedback attached to them
+    feedback_frame_ind = [] #keeps track of the starting indices that had feedback on them
+    feedback_history_for_logging = []
     def on_press(key):
         nonlocal state_action_history, feedback_history, can_go
         nonlocal output_tensor_accumulated, input_tensor_accumulated
+        nonlocal feedback_states_history, feedback_frame_ind
+        nonlocal feedback_history_for_logging
         if len(full_obs_data) == 0:
             print("Slow down! Haven't even started playing yet.")
             return
         try:
             # c for negative feedback
             if key.char == 'c':
+                playsound('./environment/sounds/' + NEG_SOUND)
                 feedback = 0
             # v for positive feedback
             elif key.char == 'v':
+                playsound('./environment/sounds/' + POS_SOUND)
                 feedback = 1
             else:
                 print("WRONG KEY! Press 'c' or 'v'")
@@ -65,7 +72,9 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
         state_action_history = np.append(state_action_history, state_action)
         feedback_history = np.append(feedback_history, feedback)
 
-        if env_name == MOUNTAIN_CAR_MODE:
+        feedback_frame = len(full_obs_data)
+
+        if (env_name == MOUNTAIN_CAR_MODE) or (env_name == SNAKE_MODE):
             # how much time passed since first frame
             # and the time the  feedback was recorded
             feedback_delta = (time.now() - start_time).total_seconds()
@@ -73,12 +82,18 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
                 make_training_data_with_gamma(full_obs_data, feedback, time_data, feedback_delta)
             output_tensor_accumulated = torch.cat((output_tensor_accumulated, output_tensor), 0)
             input_tensor_accumulated = torch.cat((input_tensor_accumulated, input_tensor), 0)
+
+            feedback_history_for_logging += [output_tensor.numpy().tolist()]
+            feedback_states_history += [input_tensor.numpy().tolist()]
         else:
             input_tensor, output_tensor = \
                 make_training_data(state_action, feedback)
             output_tensor_accumulated = torch.cat((output_tensor_accumulated, output_tensor), 0)
             input_tensor_accumulated = torch.cat((input_tensor_accumulated, input_tensor), 0)
+            feedback_history_for_logging += [feedback]
+            feedback_states_history += [state_action.tolist()]
 
+        feedback_frame_ind += [-1*feedback_frame]
         can_go = True
 
     # start a keyboard listener
@@ -123,9 +138,12 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
     listener.stop()
     listener.join()
 
-    output_dict = { "states": state_action_history, "feedback": feedback_history }
-    #print(input_tensor_accumulated, output_tensor_accumulated)
-    return input_tensor_accumulated, output_tensor_accumulated
+    output_dict = { "state_actions": [l.tolist() for l in full_obs_data],
+                    "feedback": feedback_history_for_logging,
+                    "feedback_states": feedback_states_history,
+                    "feedback_inds" : feedback_frame_ind }
+
+    return input_tensor_accumulated, output_tensor_accumulated, output_dict
 
 
 def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True):
@@ -217,10 +235,10 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
     return action_history, env
 
 
-def offline_wrapper(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True):
-    for i in range(5):
+def offline_wrapper(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True, iter=1):
+    for i in range(iter):
         print("running with no feedback")
         action_history, env = offline_no_feedback_run(net, env_name, frame_limit, snake_max_fps, human_render)
         print("running again, please give feedback")
-        indata, outdata = offline_collect_feedback(net, env_name, action_history, frame_limit, snake_max_fps, human_render, env=env)
+        indata, outdata, logging_data = offline_collect_feedback(net, env_name, action_history, frame_limit, snake_max_fps, human_render, env=env)
         train_network(net, indata, outdata)

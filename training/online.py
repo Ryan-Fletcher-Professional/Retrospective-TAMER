@@ -23,28 +23,32 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
     outputs: a list of dictionaries {"state": np.array, "feedback": binary}
     '''
 
+    # used for the algorithm (may be logged)
     last_action = 0
     last_state = np.array([])
     state_action_history = np.array([])
-    feedback_history = []
-    feedback_frame_ind = np.array([])
     time_data = np.array([])
     full_obs_data = []
     can_go = True
+    # used only for logging
+    feedback_history = []
+    feedback_states_history = []
+    feedback_frame_ind = []
 
     def on_press(key):
-        nonlocal state_action_history, feedback_history, feedback_frame_ind, can_go
+        nonlocal state_action_history, feedback_history
+        nonlocal feedback_states_history, feedback_frame_ind, can_go
         if len(full_obs_data) == 0:
             print("Slow down! Haven't even started playing yet.")
             return
         try:
             # c for negative feedback
             if key.char == 'c':
-                playsound('./environment/sounds/' + POS_SOUND)
+                playsound('./environment/sounds/' + NEG_SOUND)
                 feedback = 0
             # v for positive feedback
             elif key.char == 'v':
-                playsound('./environment/sounds/' + NEG_SOUND)
+                playsound('./environment/sounds/' + POS_SOUND)
                 feedback = 1
             else:
                 print("WRONG KEY! Press 'c' or 'v'")
@@ -68,16 +72,18 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
             feedback_delta = (time.now() - start_time).total_seconds()
             input_tensor, output_tensor = \
                 make_training_data_with_gamma(full_obs_data, feedback, time_data, feedback_delta)
-            feedback_history += [output_tensor.numpy()]
+            feedback_history += [output_tensor.numpy().tolist()]
+            feedback_states_history += [input_tensor.numpy().tolist()]
         else:
             input_tensor, output_tensor = \
                 make_training_data(state_action, feedback)
             feedback_history += [feedback]
+            feedback_states_history += [state_action.tolist()]
 
         # used for data logging purposes only
         # multiply by negative one to make it clear
         # that indexing is done from opposite end
-        feedback_frame_ind = np.append(feedback_frame_ind, -1*feedback_frame)
+        feedback_frame_ind += [-1*feedback_frame]
 
         # train network
         train_network(net, input_tensor, output_tensor)
@@ -159,5 +165,14 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
     listener.stop()
     listener.join()
 
-    output_dict = { "state_actions": full_obs_data, "feedback": feedback_history, "feedback_inds" : feedback_frame_ind }
+    print("full_obs_data", full_obs_data)
+    print("feedback", feedback_history)
+    print("feedback_states", feedback_states_history)
+    print("feedback_inds", feedback_frame_ind)
+
+    output_dict = { "state_actions": [l.tolist() for l in full_obs_data],
+                    "feedback": feedback_history,
+                    "feedback_states": feedback_states_history,
+                    "feedback_inds" : feedback_frame_ind}
+
     return output_dict
