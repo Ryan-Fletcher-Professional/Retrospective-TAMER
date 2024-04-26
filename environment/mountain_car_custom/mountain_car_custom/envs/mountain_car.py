@@ -135,7 +135,7 @@ class MountainCarEnvCustom(gym.Env):
 
         self.last_action = action
 
-        print("s:", self.state)
+        # print("s:", self.state)
         position, velocity = self.state
         velocity += (action - 1) * self.force + math.cos(3 * position) * (-self.gravity)
         velocity = np.clip(velocity, -self.max_speed, self.max_speed)

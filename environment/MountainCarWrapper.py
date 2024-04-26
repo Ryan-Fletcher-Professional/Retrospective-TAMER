@@ -20,7 +20,7 @@ class MountainCarWrapper(gym.Wrapper):
         if self.starting_state is not None:
             # print("Starting state: ", self.starting_state)
             self.env.env.state = self.starting_state
-            print(self.env.env.state)
+            # print(self.env.env.state)
         # else:
             # print("State 0: ", self.env.state)
         return self.env.state, ret[1]
@@ -29,7 +29,7 @@ class MountainCarWrapper(gym.Wrapper):
         # print(self.env.state)
         if self.starting_state is None:
             self.starting_state = self.env.state.copy()
-            print("SS: ", self.starting_state)
+            # print("SS: ", self.starting_state)
         obs, reward, terminated, truncated, info = self.env.step(action)
         self.frames += 1
         if (self.frames >= self.frame_limit) and not terminated:
