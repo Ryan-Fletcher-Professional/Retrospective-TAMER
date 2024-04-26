@@ -54,11 +54,11 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
         try:
             # c for negative feedback
             if key.char == 'c':
-                playsound('./environment/sounds/' + NEG_SOUND)
+                playsound('./environment/sounds/' + PING_SOUND)
                 feedback = 0
             # v for positive feedback
             elif key.char == 'v':
-                playsound('./environment/sounds/' + POS_SOUND)
+                playsound('./environment/sounds/' + PING_SOUND)
                 feedback = 1
             else:
                 print("WRONG KEY! Press 'c' or 'v'")
