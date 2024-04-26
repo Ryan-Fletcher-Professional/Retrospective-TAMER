@@ -118,6 +118,7 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
         last_action = int(action_history[action_ind])
         action_ind += 1
         # print("action", last_action)
+        print("o: ", env.state)
         last_state, current_reward, terminated, truncated, info = env.step(last_action)
         done = terminated or truncated
         total_reward += current_reward
