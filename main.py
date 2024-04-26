@@ -99,8 +99,8 @@ def run_script_practice(num_runs, frame_limit):
         play(env, keys_to_action=mapping)
 
 
-def run_script_live(num_practice, num_real, frame_limit, fps,
-                    mc_load=None, mc_save=None, ttt_load=None, ttt_save=None, snake_load=None, snake_save=None):
+def run_script_live(num_practice, num_real, fps,
+                    mc_load=None, mc_save=None, mc_frame_limit=None, ttt_load=None, ttt_save=None, ttt_frame_limit=None, snake_load=None, snake_save=None, snake_frame_limit=None):
     INTRO_MESSAGE_1 =\
         """
         In this experiment, you will be presented with three games:
@@ -215,7 +215,7 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
                 mc_net.load_state_dict(torch.load(mc_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, frame_limit, fps, True)
+        online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, mc_frame_limit, fps, True)
         pygame.quit()
     mc_net = Net(MOUNTAIN_CAR_MODE)
     if mc_load is not None:
@@ -226,7 +226,7 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
             print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, frame_limit, fps, True)
+        online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, mc_frame_limit, fps, True)
         pygame.quit()
         if mc_save is not None:
             torch.save(mc_net, mc_save + f"/mc_{i+1}.pt")
@@ -241,7 +241,7 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
                 ttt_net.load_state_dict(torch.load(ttt_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        online.collect_live_data(ttt_net, TTT_MODE, frame_limit, fps, True)
+        online.collect_live_data(ttt_net, TTT_MODE, ttt_frame_limit, fps, True)
     ttt_net = Net(TTT_MODE)
     if ttt_load is not None:
         try:
@@ -251,7 +251,7 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
             print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        online.collect_live_data(ttt_net, TTT_MODE, frame_limit, fps, True)
+        online.collect_live_data(ttt_net, TTT_MODE, ttt_frame_limit, fps, True)
         if ttt_save is not None:
             torch.save(ttt_net, ttt_save + f"/ttt_{i + 1}.pt")
 
@@ -265,7 +265,7 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
                 snake_net.load_state_dict(torch.load(snake_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        online.collect_live_data(snake_net, SNAKE_MODE, frame_limit, fps, True)
+        online.collect_live_data(snake_net, SNAKE_MODE, snake_frame_limit, fps, True)
         pygame.quit()
     snake_net = Net(SNAKE_MODE)
     if snake_load is not None:
@@ -276,7 +276,7 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
             print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        online.collect_live_data(snake_net, SNAKE_MODE, frame_limit, fps, True)
+        online.collect_live_data(snake_net, SNAKE_MODE, snake_frame_limit, fps, True)
         pygame.quit()
         if snake_save is not None:
             torch.save(snake_net, snake_save + f"/snake_{i + 1}.pt")
@@ -284,8 +284,8 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
     display_message_screen(OUTRO)
 
 
-def run_script_retrospective(num_practice, num_real, frame_limit, fps,
-                             mc_load=None, mc_save=None, ttt_load=None, ttt_save=None, snake_load=None, snake_save=None):
+def run_script_retrospective(num_practice, num_real, fps,
+                             mc_load=None, mc_save=None, mc_frame_limit=None, ttt_load=None, ttt_save=None, ttt_frame_limit=None, snake_load=None, snake_save=None, snake_frame_limit=None):
     INTRO_MESSAGE_1 = \
         """
         In this experiment, you will be presented with three games:
@@ -407,9 +407,9 @@ def run_script_retrospective(num_practice, num_real, frame_limit, fps,
                 mc_net.load_state_dict(torch.load(mc_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        action_history, env = offline.offline_no_feedback_run(mc_net, MOUNTAIN_CAR_MODE, frame_limit, fps, True)
+        action_history, env = offline.offline_no_feedback_run(mc_net, MOUNTAIN_CAR_MODE, mc_frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        indata, outdata = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, frame_limit, fps,
+        indata, outdata = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, mc_frame_limit, fps,
                                                    True, env=env)
         pygame.quit()
         offline.train_network(mc_net, indata, outdata)
@@ -422,9 +422,9 @@ def run_script_retrospective(num_practice, num_real, frame_limit, fps,
             print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        action_history, env = offline.offline_no_feedback_run(mc_net, MOUNTAIN_CAR_MODE, frame_limit, fps, True)
+        action_history, env = offline.offline_no_feedback_run(mc_net, MOUNTAIN_CAR_MODE, mc_frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        indata, outdata = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, frame_limit, fps,
+        indata, outdata = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, mc_frame_limit, fps,
                                                            True, env=env)
         pygame.quit()
         offline.train_network(mc_net, indata, outdata)
@@ -441,9 +441,9 @@ def run_script_retrospective(num_practice, num_real, frame_limit, fps,
                 ttt_net.load_state_dict(torch.load(ttt_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        action_history, env = offline.offline_no_feedback_run(ttt_net, TTT_MODE, frame_limit, fps, True)
+        action_history, env = offline.offline_no_feedback_run(ttt_net, TTT_MODE, ttt_frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        indata, outdata = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, frame_limit, fps,
+        indata, outdata = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, ttt_frame_limit, fps,
                                                            True, env=env)
         offline.train_network(ttt_net, indata, outdata)
     ttt_net = Net(TTT_MODE)
@@ -455,9 +455,9 @@ def run_script_retrospective(num_practice, num_real, frame_limit, fps,
             print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        action_history, env = offline.offline_no_feedback_run(ttt_net, TTT_MODE, frame_limit, fps, True)
+        action_history, env = offline.offline_no_feedback_run(ttt_net, TTT_MODE, ttt_frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        indata, outdata = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, frame_limit, fps,
+        indata, outdata = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, ttt_frame_limit, fps,
                                                            True, env=env)
         offline.train_network(ttt_net, indata, outdata)
         if ttt_save is not None:
@@ -473,9 +473,9 @@ def run_script_retrospective(num_practice, num_real, frame_limit, fps,
                 snake_net.load_state_dict(torch.load(snake_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        action_history, env = offline.offline_no_feedback_run(snake_net, SNAKE_MODE, frame_limit, fps, True)
+        action_history, env = offline.offline_no_feedback_run(snake_net, SNAKE_MODE, snake_frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        indata, outdata = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, frame_limit, fps,
+        indata, outdata = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, snake_frame_limit, fps,
                                                            True, env=env)
         pygame.quit()
         offline.train_network(snake_net, indata, outdata)
@@ -488,9 +488,9 @@ def run_script_retrospective(num_practice, num_real, frame_limit, fps,
             print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        action_history, env = offline.offline_no_feedback_run(snake_net, SNAKE_MODE, frame_limit, fps, True)
+        action_history, env = offline.offline_no_feedback_run(snake_net, SNAKE_MODE, snake_frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        indata, outdata = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, frame_limit, fps,
+        indata, outdata = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, snake_frame_limit, fps,
                                                            True, env=env)
         pygame.quit()
         offline.train_network(snake_net, indata, outdata)
@@ -514,6 +514,9 @@ if __name__ == "__main__":
     parser.add_argument('--save_ttt', default=None, type=str, help="directory in which to save the trained tictactoe network after the game is complete")
     parser.add_argument('--load_snake', default=None, type=str, help="path to a saved snake network to load")
     parser.add_argument('--save_snake', default=None, type=str, help="directory in which to save the trained snake network after the game is complete")
+    parser.add_argument('--mc_frame_limit', default=200, type=int, help="number of frames before episode of mountaincar cuts off")
+    parser.add_argument('--ttt_frame_limit', default=200, type=int, help="number of frames before episode of tictactoe cuts off")
+    parser.add_argument('--snake_frame_limit', default=100, type=int, help="number of frames before episode of snake cuts off")
 
     args = parser.parse_args()
 
@@ -546,15 +549,15 @@ if __name__ == "__main__":
             if script == 'practice':
                 run_script_practice(MOUNTAINCAR_PRACTICE_NUM_RUNS, args.frame_limit)
             elif script == 'live':
-                run_script_live(NUM_PRACTICE_RUNS_LIVE, NUM_REAL_RUNS, args.frame_limit, args.fps,
-                                mc_load=args.load_mc, mc_save=args.save_mc,
-                                ttt_load=args.load_ttt, ttt_save=args.save_ttt,
-                                snake_load=args.load_snake, snake_save=args.save_snake)
+                run_script_live(NUM_PRACTICE_RUNS_LIVE, NUM_REAL_RUNS, args.fps,
+                                mc_load=args.load_mc, mc_save=args.save_mc, mc_frame_limit=args.mc_frame_limit,
+                                ttt_load=args.load_ttt, ttt_save=args.save_ttt, ttt_frame_limit=args.ttt_frame_limit,
+                                snake_load=args.load_snake, snake_save=args.save_snake, snake_frame_limit=args.snake_frame_limit)
             elif script == 'retrospective':
-                run_script_retrospective(NUM_PRACTICE_RUNS_RETROSPECTIVE, NUM_REAL_RUNS, args.frame_limit, args.fps,
-                                         mc_load=args.load_mc, mc_save=args.save_mc,
-                                         ttt_load=args.load_ttt, ttt_save=args.save_ttt,
-                                         snake_load=args.load_snake, snake_save=args.save_snake)
+                run_script_retrospective(NUM_PRACTICE_RUNS_RETROSPECTIVE, NUM_REAL_RUNS, args.fps,
+                                         mc_load=args.load_mc, mc_save=args.save_mc, mc_frame_limit=args.mc_frame_limit,
+                                         ttt_load=args.load_ttt, ttt_save=args.save_ttt, ttt_frame_limit=args.ttt_frame_limit,
+                                         snake_load=args.load_snake, snake_save=args.save_snake, snake_frame_limit=args.snake_frame_limit)
         OUTRO = \
             """
             All done.
