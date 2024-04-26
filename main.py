@@ -6,6 +6,7 @@ from environment.mountain_car_practice.teleop import play
 from environment.mountain_car_practice.MountainCarWrapperDowngrade import MountainCarWrapperDowngrade
 from training import online, offline
 from training.offline import offline_wrapper
+import json
 
 sys.path.append(os.getcwd() + "/environment")
 import time
@@ -76,16 +77,16 @@ def run_script_practice(num_runs, frame_limit):
     INTRO_MESSAGE =\
         """
         After this screen, you will immediately see the Mountain Car game, which consists of a little car in a valley.
-        
+
         Your goal is to move the car to the top of the right side of the valley.
-        
+
         To move the car right, press the right arrow key. To move it left, press the left arrow key.
-        
+
         Think about how you need to move. The car is not strong enough to simply charge all the way up the mountain.
-        
+
         Play the game a few times to get a good feel for it.
-        
-        
+
+
         Press the Enter key to continue.
         """
 
@@ -106,16 +107,16 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
         In this experiment, you will be presented with three games:
         Mountain Car, TicTacToe, and Snake.
         We'll explain their rules later.
-        
+
         For each game, your task will be to use modified 'clicker training' to teach an AI how to play the game.
         Don't worry, it's not as hard as it sounds; we made a program that does the heavy lifting for you! All you need to do is
         press the 'c' key when the AI makes a suboptimal move and press the 'v' key when the AI makes an optimal move.
-        
+
         Make sure you give meaningful feedback, but don't think too too hard about it. Focus on actually giving feedback.
         You don't need to give feedback at every time step except in TicTacToe, but games
         that have a rapid pace give you a lot of opportunity to train your AI.
-        
-        
+
+
         Press the Enter key to see the next screen for more instructions.
         """  # TODO : Change 'optimal' to 'optimal or near-optimal'?
 
@@ -126,15 +127,15 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
         Once you're ready after that, you can press the Enter key to begin two practice runs.
         After the practice runs, you'll see the waiting screen for your first real training run.
         (We'll remind you which runs are practice and which are real.)
-        
+
         Before each practice or training run, you'll be presented with a waiting screen.
         Once you're ready there, press the Enter key to continue to the run.
         Then you'll see your AI playing the game, and you will give feedback as it does so.
         It will immediately incorporate your feedback and use it to change its behavior.
-        
+
         After all seven runs are completed for all three games, you'll be done!
-    
-    
+
+
         Press the Enter key to go to the first game.
         """
 
@@ -143,16 +144,16 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
         You are about to see your AI play the Mountain Car game.
         The goal is for the controller to move the car to the flag at
         the top of the mountain by accelerating the car left or right.
-        
+
         Press the 'c' key when the AI makes a suboptimal move and press the 'v' key when the AI makes an optimal move.
-        
+
         When your AI is accelerating the Mountain Car, it will have a blue arrow next to it, pointing
         in the direction of acceleration. This should make it easier to give accurate feedback.
-        
+
         This game moves many times per second. You don't need to give feedback at every time
         step, but the rapid pace means you have a lot of opportunity to train your AI.
-        
-        
+
+
         Press the Enter key to start the first practice run.
         """
 
@@ -161,12 +162,12 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
         You are about to see your AI play TicTacToe.
         The goal is for your AI to write three 'O' characters in a row.
         (The opponent writes one 'X' in before each of your AI's moves.)
-        
+
         Press the 'c' key when the AI makes a suboptimal move and press the 'v' key when the AI makes an optimal move.
-        
+
         The game will wait for you to give feedback after each of your AI's moves.
-        
-        
+
+
         Press the Enter key to start the first practice run.
         """
 
@@ -176,13 +177,13 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
         The goal is for the controller to move the head of the snake in one of the four cardinal directions at
         each step, guiding the snake to eat apples without running the snake into its own tail.
         The snake does not die if it hits a wall; it will simply wrap around to the other side of the board.
-        
+
         Press the 'c' key when the AI makes a suboptimal move and press the 'v' key when the AI makes an optimal move.
-        
+
         This game moves several times per second. You don't need to give feedback at every time
         step, but the rapid pace means you have a lot of opportunity to train your AI.
-        
-        
+
+
         Press the Enter key to start the runs.
         """
 
@@ -215,7 +216,7 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
                 mc_net.load_state_dict(torch.load(mc_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, frame_limit, fps, True)
+        logging_data = online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, frame_limit, fps, True)
         pygame.quit()
     mc_net = Net(MOUNTAIN_CAR_MODE)
     if mc_load is not None:
@@ -226,10 +227,12 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
             print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, frame_limit, fps, True)
+        logging_data = online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, frame_limit, fps, True)
         pygame.quit()
         if mc_save is not None:
-            torch.save(mc_net, mc_save + f"/mc_{i+1}.pt")
+            torch.save(mc_net, mc_save + f"/live_mc_{i+1}.pt")
+            with open(mc_save + f"/logs/live_mc_{i+1}.json", 'w') as fp:
+                json.dump(logging_data, fp)
 
     display_message_screen(TTT_RULES)
     for _ in range(num_practice):
@@ -241,7 +244,7 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
                 ttt_net.load_state_dict(torch.load(ttt_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        online.collect_live_data(ttt_net, TTT_MODE, frame_limit, fps, True)
+        logging_data = online.collect_live_data(ttt_net, TTT_MODE, frame_limit, fps, True)
     ttt_net = Net(TTT_MODE)
     if ttt_load is not None:
         try:
@@ -251,9 +254,11 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
             print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        online.collect_live_data(ttt_net, TTT_MODE, frame_limit, fps, True)
+        logging_data = online.collect_live_data(ttt_net, TTT_MODE, frame_limit, fps, True)
         if ttt_save is not None:
-            torch.save(ttt_net, ttt_save + f"/ttt_{i + 1}.pt")
+            torch.save(ttt_net, ttt_save + f"/live_ttt_{i + 1}.pt")
+            with open(ttt_save + f"/logs/live_ttt_{i+1}.json", 'w') as fp:
+                json.dump(logging_data, fp)
 
     display_message_screen(SNAKE_RULES)
     for _ in range(num_practice):
@@ -265,7 +270,7 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
                 snake_net.load_state_dict(torch.load(snake_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        online.collect_live_data(snake_net, SNAKE_MODE, frame_limit, fps, True)
+        logging_data = online.collect_live_data(snake_net, SNAKE_MODE, frame_limit, fps, True)
         pygame.quit()
     snake_net = Net(SNAKE_MODE)
     if snake_load is not None:
@@ -276,10 +281,12 @@ def run_script_live(num_practice, num_real, frame_limit, fps,
             print("Could not load network. Error: ", e)
     for i in range(num_real):
         display_message_screen(WAIT_REAL)
-        online.collect_live_data(snake_net, SNAKE_MODE, frame_limit, fps, True)
+        logging_data = online.collect_live_data(snake_net, SNAKE_MODE, frame_limit, fps, True)
         pygame.quit()
         if snake_save is not None:
-            torch.save(snake_net, snake_save + f"/snake_{i + 1}.pt")
+            torch.save(snake_net, snake_save + f"/live_snake_{i + 1}.pt")
+            with open(snake_save + f"/logs/live_snake_{i+1}.json", 'w') as fp:
+                json.dump(logging_data, fp)
 
     display_message_screen(OUTRO)
 
@@ -409,7 +416,7 @@ def run_script_retrospective(num_practice, num_real, frame_limit, fps,
                 print("Could not load network. Error: ", e)
         action_history, env = offline.offline_no_feedback_run(mc_net, MOUNTAIN_CAR_MODE, frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        indata, outdata = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, frame_limit, fps,
+        indata, outdata, logging_data = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, frame_limit, fps,
                                                    True, env=env)
         pygame.quit()
         offline.train_network(mc_net, indata, outdata)
@@ -424,12 +431,14 @@ def run_script_retrospective(num_practice, num_real, frame_limit, fps,
         display_message_screen(WAIT_REAL)
         action_history, env = offline.offline_no_feedback_run(mc_net, MOUNTAIN_CAR_MODE, frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        indata, outdata = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, frame_limit, fps,
+        indata, outdata, logging_data = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, frame_limit, fps,
                                                            True, env=env)
         pygame.quit()
         offline.train_network(mc_net, indata, outdata)
         if mc_save is not None:
-            torch.save(mc_net.state_dict(), mc_save + f"/mc_{i+1}.pt")
+            torch.save(mc_net.state_dict(), mc_save + f"/retrospective_mc_{i+1}.pt")
+            with open(mc_save + f"/logs/retrospective_mc_{i+1}.json", 'w') as fp:
+                json.dump(logging_data, fp)
 
     display_message_screen(TTT_RULES)
     for _ in range(num_practice):
@@ -443,7 +452,7 @@ def run_script_retrospective(num_practice, num_real, frame_limit, fps,
                 print("Could not load network. Error: ", e)
         action_history, env = offline.offline_no_feedback_run(ttt_net, TTT_MODE, frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        indata, outdata = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, frame_limit, fps,
+        indata, outdata, logging_data = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, frame_limit, fps,
                                                            True, env=env)
         offline.train_network(ttt_net, indata, outdata)
     ttt_net = Net(TTT_MODE)
@@ -457,11 +466,13 @@ def run_script_retrospective(num_practice, num_real, frame_limit, fps,
         display_message_screen(WAIT_REAL)
         action_history, env = offline.offline_no_feedback_run(ttt_net, TTT_MODE, frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        indata, outdata = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, frame_limit, fps,
+        indata, outdata, logging_data = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, frame_limit, fps,
                                                            True, env=env)
         offline.train_network(ttt_net, indata, outdata)
         if ttt_save is not None:
-            torch.save(ttt_net.state_dict(), ttt_save + f"/ttt_{i+1}.pt")
+            torch.save(ttt_net.state_dict(), ttt_save + f"/retrospective_ttt_{i+1}.pt")
+            with open(ttt_save + f"/logs/retrospective_ttt_{i+1}.json", 'w') as fp:
+                json.dump(logging_data, fp)
 
     display_message_screen(SNAKE_RULES)
     for _ in range(num_practice):
@@ -475,7 +486,7 @@ def run_script_retrospective(num_practice, num_real, frame_limit, fps,
                 print("Could not load network. Error: ", e)
         action_history, env = offline.offline_no_feedback_run(snake_net, SNAKE_MODE, frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        indata, outdata = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, frame_limit, fps,
+        indata, outdata, logging_data = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, frame_limit, fps,
                                                            True, env=env)
         pygame.quit()
         offline.train_network(snake_net, indata, outdata)
@@ -490,13 +501,14 @@ def run_script_retrospective(num_practice, num_real, frame_limit, fps,
         display_message_screen(WAIT_REAL)
         action_history, env = offline.offline_no_feedback_run(snake_net, SNAKE_MODE, frame_limit, fps, True)
         display_message_screen(WAIT_FEEDBACK)
-        indata, outdata = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, frame_limit, fps,
+        indata, outdata, logging_data = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, frame_limit, fps,
                                                            True, env=env)
         pygame.quit()
         offline.train_network(snake_net, indata, outdata)
         if snake_save is not None:
-            torch.save(snake_net.state_dict(), snake_save + f"/snake_{i+1}.pt")
-
+            torch.save(snake_net.state_dict(), snake_save + f"/retrospective_snake_{i+1}.pt")
+            with open(snake_save + f"/logs/retrospective_snake_{i+1}.json", 'w') as fp:
+                json.dump(logging_data, fp)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=None)
@@ -529,10 +541,10 @@ if __name__ == "__main__":
         for i in range(args.num_plays):
             if args.feedback_mode == "online":
                 data = online.collect_live_data(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.fps)
-                print("Data for run " + str(i + 1) + ":\n" + str(data))
+                print("Online run " + str(i + 1) + " complete")
             elif args.feedback_mode == "offline":
-                offline_wrapper(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.fps)
-                print("Didn't collect data, but offline run " + str(i + 1) + " complete.")
+                offline_wrapper(net, env_name=args.mode, frame_limit=args.frame_limit, snake_max_fps=args.fps, iter=args.num_plays)
+                print("Offline run " + str(i + 1) + " complete.")
         # save the resulting network
         if args.save_net is not None:
             print("Saving trained network at ", args.save_net)
