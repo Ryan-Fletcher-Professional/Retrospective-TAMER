@@ -41,7 +41,7 @@ DEFAULT_POLICY_SIZES[TTT_MODE] = _layer_safe([MODE_INPUT_SIZES[TTT_MODE], 16, 32
 #                                                 (_snake_bulge_layer_size + FEEDBACK_SIZE) / 2,
 #                                                 FEEDBACK_SIZE])
 DEFAULT_POLICY_SIZES[SNAKE_MODE] = _layer_safe([MODE_INPUT_SIZES[SNAKE_MODE],
-                                                32, 64, 32,
+                                                16, 32, 16,
                                                 MODE_INPUT_SIZES[SNAKE_MODE],
                                                 FEEDBACK_SIZE])
 
@@ -50,5 +50,5 @@ NUM_PRACTICE_RUNS_LIVE = 2
 NUM_PRACTICE_RUNS_RETROSPECTIVE = 1  # Since they can't see improvement anyway
 NUM_REAL_RUNS = 1  # 5
 
-POS_SOUND = 'start-13691.mp3'
-NEG_SOUND = 'bloop-1-184019.mp3'
+PING_SOUND = 'start-13691.mp3'
+BLOOP_SOUND = 'bloop-1-184019.mp3'

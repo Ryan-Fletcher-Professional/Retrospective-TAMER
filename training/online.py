@@ -44,11 +44,11 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
         try:
             # c for negative feedback
             if key.char == 'c':
-                playsound('./environment/sounds/' + NEG_SOUND)
+                playsound('./environment/sounds/' + PING_SOUND)
                 feedback = 0
             # v for positive feedback
             elif key.char == 'v':
-                playsound('./environment/sounds/' + POS_SOUND)
+                playsound('./environment/sounds/' + PING_SOUND)
                 feedback = 1
             else:
                 print("WRONG KEY! Press 'c' or 'v'")
