@@ -543,6 +543,9 @@ if __name__ == "__main__":
     parser.add_argument('--mc_lr', default=0.2, type=float, help="learning rate for the network for mountaincar")
     parser.add_argument('--ttt_lr', default=0.2, type=float, help="learning rate for the network for ttt")
     parser.add_argument('--snake_lr', default=0.2, type=float, help="learning rate for the network for snake")
+    parser.add_argument('--do_mc', default=True, type=bool, help="whether to include the mountaincar game in scripted runs")
+    parser.add_argument('--do_ttt', default=True, type=bool, help="whether to include the tictactoe game in scripted runs")
+    parser.add_argument('--do_snake', default=False, type=bool, help="whether to include the snake game in scripted runs")
 
     args = parser.parse_args()
 
