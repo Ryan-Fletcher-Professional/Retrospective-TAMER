@@ -287,7 +287,7 @@ def run_script_live(num_practice, num_real, fps,
                 print("Could not load network. Error: ", e)
         for i in range(num_real):
             display_message_screen(WAIT_REAL)
-            logging_data = online.collect_live_data(snake_net, SNAKE_MODE, snake_frame_limit, fps, True, lr=snake+lr)
+            logging_data = online.collect_live_data(snake_net, SNAKE_MODE, snake_frame_limit, fps, True, lr=snake_lr)
             pygame.quit()
             if snake_save is not None:
                 torch.save(snake_net, snake_save + f"/live_snake_{i + 1}.pt")
@@ -428,7 +428,7 @@ def run_script_retrospective(num_practice, num_real, fps,
             indata, outdata, logging_data = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, mc_frame_limit, fps,
                                                        True, env=env)
             pygame.quit()
-            offline.train_network(mc_net, indata, outdata, lr=mc_lr)
+            train_network(mc_net, indata, outdata, lr=mc_lr)
         mc_net = Net(MOUNTAIN_CAR_MODE)
         if mc_load is not None:
             try:
@@ -443,7 +443,7 @@ def run_script_retrospective(num_practice, num_real, fps,
             indata, outdata, logging_data = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, mc_frame_limit, fps,
                                                                True, env=env)
             pygame.quit()
-            offline.train_network(mc_net, indata, outdata, lr=mc_lr)
+            train_network(mc_net, indata, outdata, lr=mc_lr)
             if mc_save is not None:
                 torch.save(mc_net.state_dict(), mc_save + f"/retrospective_mc_{i+1}.pt")
                 with open(mc_save + f"/logs/retrospective_mc_{i+1}.json", 'w') as fp:
@@ -464,7 +464,7 @@ def run_script_retrospective(num_practice, num_real, fps,
             display_message_screen(WAIT_FEEDBACK)
             indata, outdata, logging_data = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, ttt_frame_limit, fps,
                                                                True, env=env)
-            offline.train_network(ttt_net, indata, outdata, lr=ttt_lr)
+            train_network(ttt_net, indata, outdata, lr=ttt_lr)
         ttt_net = Net(TTT_MODE)
         if ttt_load is not None:
             try:
@@ -478,7 +478,7 @@ def run_script_retrospective(num_practice, num_real, fps,
             display_message_screen(WAIT_FEEDBACK)
             indata, outdata, logging_data = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, ttt_frame_limit, fps,
                                                                True, env=env)
-            offline.train_network(ttt_net, indata, outdata, lr=ttt_lr)
+            train_network(ttt_net, indata, outdata, lr=ttt_lr)
             if ttt_save is not None:
                 torch.save(ttt_net.state_dict(), ttt_save + f"/retrospective_ttt_{i+1}.pt")
                 with open(ttt_save + f"/logs/retrospective_ttt_{i+1}.json", 'w') as fp:
@@ -500,7 +500,7 @@ def run_script_retrospective(num_practice, num_real, fps,
             indata, outdata, logging_data = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, snake_frame_limit, fps,
                                                                True, env=env)
             pygame.quit()
-            offline.train_network(snake_net, indata, outdata, lr=snake_lr)
+            train_network(snake_net, indata, outdata, lr=snake_lr)
         snake_net = Net(SNAKE_MODE)
         if snake_load is not None:
             try:
@@ -515,7 +515,7 @@ def run_script_retrospective(num_practice, num_real, fps,
             indata, outdata, logging_data = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, snake_frame_limit, fps,
                                                                True, env=env)
             pygame.quit()
-            offline.train_network(snake_net, indata, outdata, lr=snake_lr)
+            train_network(snake_net, indata, outdata, lr=snake_lr)
             if snake_save is not None:
                 torch.save(snake_net.state_dict(), snake_save + f"/retrospective_snake_{i+1}.pt")
                 with open(snake_save + f"/logs/retrospective_snake_{i+1}.json", 'w') as fp:

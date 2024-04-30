@@ -1,14 +1,15 @@
 from torch.optim import Adam
 import torch.nn as nn
 
-def train_network(net, input, output):
+
+def train_network(net, input, output, lr=0.2):
     '''
     Takes correctly formatted input and output tensors and
     trains the given network
     '''
     # print(input.numpy(), output.numpy())
 
-    optimizer = Adam(net.parameters(), lr=0.2)
+    optimizer = Adam(net.parameters(), lr=lr)
     loss_criterion = nn.CrossEntropyLoss()
     optimizer.zero_grad()
     #run action,state through policy to get predicted logits for classifying action

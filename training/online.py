@@ -16,7 +16,7 @@ from training.train_network import train_network
 import pygame
 
 
-def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True):
+def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True, lr=0.2):
     '''
     Run a live simulation and collect keyboard data
     inputs: policy, gym environment name, and whether to render
@@ -86,7 +86,7 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
         feedback_frame_ind += [-1*feedback_frame]
 
         # train network
-        train_network(net, input_tensor, output_tensor)
+        train_network(net, input_tensor, output_tensor, lr=lr)
 
         can_go = True
 
