@@ -5,14 +5,14 @@ import numpy as np
 
 
 class MountainCarWrapper(gym.Wrapper):
-    def __init__(self, env, frame_limit=200, human_render=True):
+    def __init__(self, env, frame_limit=200, human_render=True, starting_state=None):
         super().__init__(env)
         self.env = self.env.env  # Should bypass default frame limit
         self.current_agent_index = 0  # TODO : Remove???
         self.frame_limit = frame_limit
         self.frames = 0
         self.human_render = human_render
-        self.starting_state = None
+        self.starting_state = starting_state
 
     def reset(self):
         self.frames = 0

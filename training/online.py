@@ -16,7 +16,7 @@ from training.train_network import train_network
 import pygame
 
 
-def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True, lr=0.2):
+def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True, lr=0.2, starting_state=None, trajectory=None):
     '''
     Run a live simulation and collect keyboard data
     inputs: policy, gym environment name, and whether to render
@@ -117,16 +117,16 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
 
     if env_name == MOUNTAIN_CAR_MODE:
         if human_render:
-            env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE, render_mode='human'), frame_limit)
+            env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE, render_mode='human'), frame_limit, starting_state=starting_state)
         else:
-            env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE), frame_limit)
+            env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE), frame_limit, starting_state=starting_state)
     elif env_name == TTT_MODE:
         # Wraps the TTT environment to alter arguments for version compatibility
         env = TTTWrapper(TicTacToeEnv(), '0', frame_limit, human_render)
         agents.append(lambda _: random.choice(env.available_actions()))
         run_continuously = False
     elif env_name == SNAKE_MODE:
-        env = SnakeWrapper(gym.make(env_name), 'human' if human_render else None, frame_limit, snake_max_fps)  # Snake game does not use env.render() so we can't make it not render
+        env = SnakeWrapper(gym.make(env_name), 'human' if human_render else None, frame_limit, snake_max_fps, starting_state=starting_state)  # Snake game does not use env.render() so we can't make it not render
     elif (env_name == "snake-v0") or (env_name == "snake-tiled-v0"):
         print("!!!!!!!!\tError: Do you mean to play snake-custom-v0?\t!!!!!!!!")
         return
@@ -138,12 +138,14 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
     # play the game until terminated
     done = False
     start_time = time.now()
+    trajectory_index = 0
     while not done:
         # take the action that the network assigns the highest logit value to
         # Note that first we convert from numpy to tensor and then we get the value of the
         # argmax using .item() and feed that into the environment
         current_agent_index = (current_agent_index + 1) % len(agents)  # len(agents) = 1 when in single-agent game
-        last_action = agents[current_agent_index](last_state)
+        last_action = agents[current_agent_index](last_state) if (trajectory is None) else trajectory[trajectory_index]
+        trajectory_index += 1
         # print(action)
         last_state, current_reward, terminated, truncated, info = env.step(last_action)
         done = terminated or truncated

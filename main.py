@@ -1,3 +1,4 @@
+import math
 import random
 import os
 import sys
@@ -101,10 +102,13 @@ def run_script_practice(num_runs, frame_limit):
         play(env, keys_to_action=mapping)
 
 
-def run_script_live(num_practice, num_real, fps,
-                    mc_load=None, mc_save=None, mc_frame_limit=None, mc_lr=None, do_mc=None,
+def run_script_live(num_practice, fps,
+                    mc_load=None, mc_save=None, mc_frame_limit=None, mc_lr=None, do_mc=None, mc_plays=None,
+                    mc_trajs=None,
                     ttt_load=None, ttt_save=None, ttt_frame_limit=None, ttt_lr=None, do_ttt=None,
-                    snake_load=None, snake_save=None, snake_frame_limit=None, snake_lr=None, do_snake=None):
+                    ttt_plays=None, ttt_trajs=None,
+                    snake_load=None, snake_save=None, snake_frame_limit=None, snake_lr=None, do_snake=None,
+                    snake_plays=None, snake_trajs=None):
     INTRO_MESSAGE_1 =\
         """
         In this experiment, you will be presented with three games:
@@ -229,9 +233,9 @@ def run_script_live(num_practice, num_real, fps,
                 mc_net.load_state_dict(torch.load(mc_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        for i in range(num_real):
+        for i in range(mc_plays):
             display_message_screen(WAIT_REAL)
-            logging_data = online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, mc_frame_limit, fps, True, lr=mc_lr)
+            logging_data = online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, mc_frame_limit, fps, True, lr=mc_lr, starting_state=mc_trajs[i % len(mc_trajs)][0], trajectory=mc_trajs[i % len(mc_trajs)][1])
             pygame.quit()
             if mc_save is not None:
                 torch.save(mc_net, mc_save + f"/live_mc_{i+1}.pt")
@@ -257,9 +261,9 @@ def run_script_live(num_practice, num_real, fps,
                 ttt_net.load_state_dict(torch.load(ttt_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        for i in range(num_real):
+        for i in range(ttt_plays):
             display_message_screen(WAIT_REAL)
-            logging_data = online.collect_live_data(ttt_net, TTT_MODE, ttt_frame_limit, fps, True, lr=ttt_lr)
+            logging_data = online.collect_live_data(ttt_net, TTT_MODE, ttt_frame_limit, fps, True, lr=ttt_lr, trajectory=ttt_trajs[i % len(ttt_trajs)][1])
             if ttt_save is not None:
                 torch.save(ttt_net, ttt_save + f"/live_ttt_{i + 1}.pt")
                 with open(ttt_save + f"/logs/live_ttt_{i+1}.json", 'w') as fp:
@@ -285,9 +289,9 @@ def run_script_live(num_practice, num_real, fps,
                 snake_net.load_state_dict(torch.load(snake_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        for i in range(num_real):
+        for i in range(snake_plays):
             display_message_screen(WAIT_REAL)
-            logging_data = online.collect_live_data(snake_net, SNAKE_MODE, snake_frame_limit, fps, True, lr=snake_lr)
+            logging_data = online.collect_live_data(snake_net, SNAKE_MODE, snake_frame_limit, fps, True, lr=snake_lr, starting_state=snake_trajs[i % len(snake_trajs)][0], trajectory=snake_trajs[i % len(snake_trajs)][1])
             pygame.quit()
             if snake_save is not None:
                 torch.save(snake_net, snake_save + f"/live_snake_{i + 1}.pt")
@@ -297,10 +301,13 @@ def run_script_live(num_practice, num_real, fps,
     display_message_screen(OUTRO)
 
 
-def run_script_retrospective(num_practice, num_real, fps,
-                             mc_load=None, mc_save=None, mc_frame_limit=None, mc_lr=None, do_mc=None,
+def run_script_retrospective(num_practice, fps,
+                             mc_load=None, mc_save=None, mc_frame_limit=None, mc_lr=None, do_mc=None, mc_plays=None,
+                             mc_trajs=None,
                              ttt_load=None, ttt_save=None, ttt_frame_limit=None, ttt_lr=None, do_ttt=None,
-                             snake_load=None, snake_save=None, snake_frame_limit=None, snake_lr=None, do_snake=None):
+                             ttt_plays=None, ttt_trajs=None,
+                             snake_load=None, snake_save=None, snake_frame_limit=None, snake_lr=None, do_snake=None,
+                             snake_plays=None, snake_trajs=None):
     INTRO_MESSAGE_1 = \
         """
         In this experiment, you will be presented with three games:
@@ -436,9 +443,9 @@ def run_script_retrospective(num_practice, num_real, fps,
                 mc_net.load_state_dict(torch.load(mc_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        for i in range(num_real):
+        for i in range(mc_plays):
             display_message_screen(WAIT_REAL)
-            action_history, env = offline.offline_no_feedback_run(mc_net, MOUNTAIN_CAR_MODE, mc_frame_limit, fps, True)
+            action_history, env = offline.offline_no_feedback_run(mc_net, MOUNTAIN_CAR_MODE, mc_frame_limit, fps, True, starting_state=mc_trajs[i % len(mc_trajs)][0], trajectory=mc_trajs[i % len(mc_trajs)][1])
             display_message_screen(WAIT_FEEDBACK)
             indata, outdata, logging_data = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, mc_frame_limit, fps,
                                                                True, env=env)
@@ -472,9 +479,9 @@ def run_script_retrospective(num_practice, num_real, fps,
                 ttt_net.load_state_dict(torch.load(ttt_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        for i in range(num_real):
+        for i in range(ttt_plays):
             display_message_screen(WAIT_REAL)
-            action_history, env = offline.offline_no_feedback_run(ttt_net, TTT_MODE, ttt_frame_limit, fps, True)
+            action_history, env = offline.offline_no_feedback_run(ttt_net, TTT_MODE, ttt_frame_limit, fps, True, trajectory=ttt_trajs[i % len(ttt_trajs)][1])
             display_message_screen(WAIT_FEEDBACK)
             indata, outdata, logging_data = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, ttt_frame_limit, fps,
                                                                True, env=env)
@@ -508,9 +515,9 @@ def run_script_retrospective(num_practice, num_real, fps,
                 snake_net.load_state_dict(torch.load(snake_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
-        for i in range(num_real):
+        for i in range(snake_plays):
             display_message_screen(WAIT_REAL)
-            action_history, env = offline.offline_no_feedback_run(snake_net, SNAKE_MODE, snake_frame_limit, fps, True)
+            action_history, env = offline.offline_no_feedback_run(snake_net, SNAKE_MODE, snake_frame_limit, fps, True, starting_state=snake_trajs[i % len(snake_trajs)][0], trajectory=snake_trajs[i % len(snake_trajs)][1])
             display_message_screen(WAIT_FEEDBACK)
             indata, outdata, logging_data = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, snake_frame_limit, fps,
                                                                True, env=env)
@@ -520,6 +527,33 @@ def run_script_retrospective(num_practice, num_real, fps,
                 torch.save(snake_net.state_dict(), snake_save + f"/retrospective_snake_{i+1}.pt")
                 with open(snake_save + f"/logs/retrospective_snake_{i+1}.json", 'w') as fp:
                     json.dump(logging_data, fp)
+
+
+def parse_trajs(directory):
+    """
+        Each input file should be a text file with a single line in the following format:
+        [start_state[0], start_state[1], ...]; [action 0, action 1, ...]
+
+        (snake starting state should be flattened; will be automatically reshaped when used)
+    """
+    if directory is None:
+        return None
+    ret = []
+    i = 0
+    while True:
+        try:
+            with open(directory + "/" + str(i) + ".txt", 'r') as file:
+                i += 1
+                parts = file.read().split("; ")
+                ret.append(([float(arg) for arg in parts[0][1:-1].split(", ")], [int(arg) for arg in parts[1][1:-1].split(", ")]))
+        except FileNotFoundError:
+            break
+    if len(ret) == 0:
+        return None
+    return ret  # [ ([start state 0], [action 0-0, action 0-1, ...]),
+                #   ([start state 1], [action 1-0, action 1-1, ...]),
+                #   ... ]
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=None)
@@ -543,9 +577,15 @@ if __name__ == "__main__":
     parser.add_argument('--mc_lr', default=0.2, type=float, help="learning rate for the network for mountaincar")
     parser.add_argument('--ttt_lr', default=0.2, type=float, help="learning rate for the network for ttt")
     parser.add_argument('--snake_lr', default=0.2, type=float, help="learning rate for the network for snake")
-    parser.add_argument('--do_mc', default=True, type=bool, help="whether to include the mountaincar game in scripted runs")
-    parser.add_argument('--do_ttt', default=True, type=bool, help="whether to include the tictactoe game in scripted runs")
-    parser.add_argument('--do_snake', default=False, type=bool, help="whether to include the snake game in scripted runs")
+    parser.add_argument('--do_mc', default="True", type=str, help="whether to include the mountaincar game in scripted runs")
+    parser.add_argument('--do_ttt', default="True", type=str, help="whether to include the tictactoe game in scripted runs")
+    parser.add_argument('--do_snake', default="True", type=str, help="whether to include the snake game in scripted runs")
+    parser.add_argument('--mc_plays', default=NUM_REAL_RUNS, type=int, help="number of plays in the script for mountaincar")
+    parser.add_argument('--ttt_plays', default=NUM_REAL_RUNS, type=int, help="number of plays in the script for tictactoe")
+    parser.add_argument('--snake_plays', default=NUM_REAL_RUNS, type=int, help="number of plays in the script for snake")
+    parser.add_argument('--mc_trajectory', default=None, type=str, help="manual trajectory directory in the script for mountaincar")
+    parser.add_argument('--ttt_trajectory', default=None, type=str, help="manual trajectory directory in the script for tictactoe")
+    parser.add_argument('--snake_trajectory', default=None, type=str, help="manual trajectory directory in the script for snake")
 
     args = parser.parse_args()
 
@@ -579,15 +619,31 @@ if __name__ == "__main__":
             if script == 'practice':
                 run_script_practice(MOUNTAINCAR_PRACTICE_NUM_RUNS, args.frame_limit)
             elif script == 'live':
-                run_script_live(NUM_PRACTICE_RUNS_LIVE, NUM_REAL_RUNS, args.fps,
-                                mc_load=args.load_mc, mc_save=args.save_mc, mc_frame_limit=args.mc_frame_limit, mc_lr=args.mc_lr, do_mc=args.do_mc,
-                                ttt_load=args.load_ttt, ttt_save=args.save_ttt, ttt_frame_limit=args.ttt_frame_limit, ttt_lr=args.ttt_lr, do_ttt=args.do_ttt,
-                                snake_load=args.load_snake, snake_save=args.save_snake, snake_frame_limit=args.snake_frame_limit, snake_lr=args.snake_lr, do_snake=args.do_snake)
+                run_script_live(NUM_PRACTICE_RUNS_LIVE, args.fps,
+                                mc_load=args.load_mc, mc_save=args.save_mc, mc_frame_limit=args.mc_frame_limit,
+                                    mc_lr=args.mc_lr, do_mc=args.do_mc == "True", mc_plays=args.mc_plays,
+                                    mc_trajs=parse_trajs(args.mc_trajectory),
+                                ttt_load=args.load_ttt, ttt_save=args.save_ttt, ttt_frame_limit=args.ttt_frame_limit,
+                                    ttt_lr=args.ttt_lr, do_ttt=args.do_ttt == "True", ttt_plays=args.ttt_plays,
+                                    ttt_trajs=parse_trajs(args.ttt_trajectory),
+                                snake_load=args.load_snake, snake_save=args.save_snake,
+                                    snake_frame_limit=args.snake_frame_limit, snake_lr=args.snake_lr,
+                                    do_snake=args.do_snake == "True", snake_plays=args.snake_plays,
+                                    snake_trajs=parse_trajs(args.snake_trajectory))
             elif script == 'retrospective':
-                run_script_retrospective(NUM_PRACTICE_RUNS_RETROSPECTIVE, NUM_REAL_RUNS, args.fps,
-                                         mc_load=args.load_mc, mc_save=args.save_mc, mc_frame_limit=args.mc_frame_limit, mc_lr=args.mc_lr, do_mc=args.do_mc,
-                                         ttt_load=args.load_ttt, ttt_save=args.save_ttt, ttt_frame_limit=args.ttt_frame_limit, ttt_lr=args.ttt_lr, do_ttt=args.do_ttt,
-                                         snake_load=args.load_snake, snake_save=args.save_snake, snake_frame_limit=args.snake_frame_limit, snake_lr=args.snake_lr, do_snake=args.do_snake)
+                print(parse_trajs(args.mc_trajectory))
+                run_script_retrospective(NUM_PRACTICE_RUNS_RETROSPECTIVE, args.fps,
+                                         mc_load=args.load_mc, mc_save=args.save_mc, mc_frame_limit=args.mc_frame_limit,
+                                            mc_lr=args.mc_lr, do_mc=args.do_mc == "True", mc_plays=args.mc_plays,
+                                            mc_trajs=parse_trajs(args.mc_trajectory),
+                                         ttt_load=args.load_ttt, ttt_save=args.save_ttt,
+                                            ttt_frame_limit=args.ttt_frame_limit,
+                                            ttt_lr=args.ttt_lr, do_ttt=args.do_ttt == "True", ttt_plays=args.ttt_plays,
+                                            ttt_trajs=parse_trajs(args.ttt_trajectory),
+                                         snake_load=args.load_snake, snake_save=args.save_snake,
+                                            snake_frame_limit=args.snake_frame_limit, snake_lr=args.snake_lr,
+                                            do_snake=args.do_snake == "True", snake_plays=args.snake_plays,
+                                            snake_trajs=parse_trajs(args.snake_trajectory))
         OUTRO = \
             """
             All done.

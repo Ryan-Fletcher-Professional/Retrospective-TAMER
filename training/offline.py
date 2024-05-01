@@ -147,12 +147,13 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
     return input_tensor_accumulated, output_tensor_accumulated, output_dict
 
 
-def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True):
+def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True, starting_state=None, trajectory=None):
     '''
     Use the network to predict actions but do not use any listeners for feedback.
     No training takes place during this run. Only we thing we need to keep track of
     is what actions are taken.
     '''
+    print("TRAJECTORY:", trajectory)
 
     action_history = np.array([])
     can_go = True
@@ -188,7 +189,7 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
 
     if env_name == MOUNTAIN_CAR_MODE:
         if human_render:
-            env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE, render_mode='human'), frame_limit)
+            env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE, render_mode='human'), frame_limit, starting_state=starting_state)
         else:
             env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE), frame_limit)
     elif env_name == TTT_MODE:
@@ -197,7 +198,7 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
         agents.append(lambda _: random.choice(env.available_actions()))
         run_continuously = False
     elif env_name == SNAKE_MODE:
-        env = SnakeWrapper(gym.make(env_name), 'human' if human_render else None, frame_limit=frame_limit, max_fps=snake_max_fps)  # Snake game does not use env.render() so we can't make it not render
+        env = SnakeWrapper(gym.make(env_name), 'human' if human_render else None, frame_limit=frame_limit, max_fps=snake_max_fps, starting_state=starting_state)  # Snake game does not use env.render() so we can't make it not render
     elif env_name == "MountainCar-v0":
         print("!!!!!!!!\tError: Do you mean to play MountainCarCustom-v0?\t!!!!!!!!")
         return
@@ -212,20 +213,26 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
     last_state, _ = env.reset()
     # play the game until terminated
     done = False
+    trajectory_index = 0
     while not done:
-        # take the action that the network assigns the highest logit value to
-        # Note that first we convert from numpy to tensor and then we get the value of the
-        # argmax using .item() and feed that into the environment
-        current_agent_index = (current_agent_index + 1) % len(agents)  # len(agents) = 1 when in single-agent game
-        last_action = agents[current_agent_index](last_state)
-        last_state, current_reward, terminated, truncated, info = env.step(last_action)
-        done = terminated or truncated
-        total_reward += current_reward
-        action_history = np.append(action_history, last_action)
-        if (not run_continuously) and (current_agent_index in wait_agents):
-            can_go = False
-        while not can_go:
-            tm.sleep(1)
+        try:
+            # take the action that the network assigns the highest logit value to
+            # Note that first we convert from numpy to tensor and then we get the value of the
+            # argmax using .item() and feed that into the environment
+            current_agent_index = (current_agent_index + 1) % len(agents)  # len(agents) = 1 when in single-agent game
+            last_action = agents[current_agent_index](last_state) if (trajectory is None) else trajectory[trajectory_index]
+            trajectory_index += 1
+            last_state, current_reward, terminated, truncated, info = env.step(last_action)
+            done = terminated or truncated
+            total_reward += current_reward
+            action_history = np.append(action_history, last_action)
+            if (not run_continuously) and (current_agent_index in wait_agents):
+                can_go = False
+            while not can_go:
+                tm.sleep(1)
+        except IndexError as e:
+            print("ERROR ON FRAME:", trajectory_index)
+            raise e
 
     if env_name == TTT_MODE:
         env.show_result(human_render, total_reward)
