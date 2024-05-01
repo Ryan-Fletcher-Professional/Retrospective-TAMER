@@ -7,13 +7,15 @@ def train_network(net, input, output, lr=0.2):
     Takes correctly formatted input and output tensors and
     trains the given network
     '''
-    # print(input.numpy(), output.numpy())
-
+    print("---------------------")
+    print(input.numpy(), output.numpy())
+    print("---------------------")
     optimizer = Adam(net.parameters(), lr=lr)
     loss_criterion = nn.CrossEntropyLoss()
     optimizer.zero_grad()
     #run action,state through policy to get predicted logits for classifying action
     pred_action_logits = net.predict(input)
+    output = nn.functional.softmax(output, dim=0)
     #now compute loss
     loss = loss_criterion(pred_action_logits, output)
     #back propagate the error through the network

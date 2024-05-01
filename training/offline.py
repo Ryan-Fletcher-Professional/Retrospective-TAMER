@@ -236,10 +236,10 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
     return action_history, env
 
 
-def offline_wrapper(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True, iter=1):
+def offline_wrapper(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True, iter=1, lr=0.2):
     for i in range(iter):
         print("running with no feedback")
         action_history, env = offline_no_feedback_run(net, env_name, frame_limit, snake_max_fps, human_render)
         print("running again, please give feedback")
         indata, outdata, logging_data = offline_collect_feedback(net, env_name, action_history, frame_limit, snake_max_fps, human_render, env=env)
-        train_network(net, indata, outdata)
+        train_network(net, indata, outdata, lr)

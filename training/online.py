@@ -149,6 +149,11 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
         done = terminated or truncated
         total_reward += current_reward
         state_action = make_state_action(last_state, last_action, env_name)
+        if env_name == MOUNTAIN_CAR_MODE:
+            # extract a feature of the direction of the car
+            # use it to replace the action of not doing anything since its always
+            # 0 anyway
+            state_action[3] = 1*(state_action[1]>0)
         full_obs_data.append(state_action)
         # how much time passed since first frame
         delta = (time.now() - start_time).total_seconds()

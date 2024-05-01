@@ -30,6 +30,7 @@ class Net(nn.Module):
     def predict(self, state_action):
         #print(state_action)
         out = self.network(state_action)
+        out = nn.functional.softmax(out, dim=0)
         return out
 
     def predict_max_action(self, state, invalid_actions):
@@ -44,25 +45,19 @@ class Net(nn.Module):
         #print(line + "\n" + title + line)
         for i in range(self.action_size):
             if invalid_actions[i] == 1:
-                pass#preds.append(0)
+                preds.append(0)
             else:
                 #print("STATE: " + str(state))
                 #print("ACTION: " + str(action_space[i]), "action size", self.action_size)
+                if self.mode == DEFAULT_MODE:
+                    action_space[i][1] = 1*(state[1]>0)
+
                 state_action = torch.as_tensor(np.append(state, action_space[i]), dtype=torch.float32)
+
                 new_pred = self.predict(state_action)
                 # print(new_pred)
                 new_pred_proba = nn.functional.softmax(new_pred, dim=0)
                 preds.append(new_pred_proba[1].item())
-        #print(preds)
-        s_preds = nn.functional.softmax(torch.as_tensor(np.asarray(preds)), dim=0)
-        next = 0
-        preds = []
-        for i in range(self.action_size):
-            if invalid_actions[i] == 1:
-                preds.append(0)
-            else:
-                preds.append(s_preds[next].item())
-                next += 1
         print(preds)
         best_action_ind = np.argmax(np.asarray(preds))
         #print(line + "\n")
