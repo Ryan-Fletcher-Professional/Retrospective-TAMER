@@ -14,7 +14,7 @@ def mlp(sizes, activation=nn.ReLU, output_activation=nn.Identity):
     #print(sizes)
     for j in range(len(sizes) - 1):
         act = activation if j < len(sizes) - 2 else output_activation
-        layers += [nn.Linear(sizes[j], sizes[j + 1]), act()]
+        layers += [nn.Linear(sizes[j], sizes[j + 1]), act(sizes[j + 1]) if act == nn.LayerNorm else act()]
     return nn.Sequential(*layers)
 
 
@@ -58,7 +58,7 @@ class Net(nn.Module):
                 # print(new_pred)
                 new_pred_proba = nn.functional.softmax(new_pred, dim=0)
                 preds.append(new_pred_proba[1].item())
-        print(preds)
+        print("Predictions: ", preds)
         best_action_ind = np.argmax(np.asarray(preds))
         #print(line + "\n")
         return best_action_ind

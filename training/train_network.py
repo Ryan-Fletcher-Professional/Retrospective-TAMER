@@ -23,3 +23,6 @@ def train_network(net, input, output, lr=0.2):
     #perform update on policy parameters
     optimizer.step()
     #print("Updating network. Input: ", input.numpy(), "\nOutput: ", output.numpy())
+
+    for layer in net.parameters():
+        print(layer.data)
