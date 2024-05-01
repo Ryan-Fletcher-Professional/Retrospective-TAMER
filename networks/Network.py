@@ -55,10 +55,11 @@ class Net(nn.Module):
                 state_action = torch.as_tensor(np.append(state, action_space[i]), dtype=torch.float32)
 
                 new_pred = self.predict(state_action)
+                print("Actual predictions:", new_pred)
                 # print(new_pred)
                 new_pred_proba = nn.functional.softmax(new_pred, dim=0)
                 preds.append(new_pred_proba[1].item())
-        print("Predictions: ", preds)
+        # print("PREDICTIONS:", preds)
         best_action_ind = np.argmax(np.asarray(preds))
         #print(line + "\n")
         return best_action_ind

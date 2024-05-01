@@ -75,11 +75,15 @@ def make_training_data_with_gamma(state_action_data, feedback, time_data, feedba
     # on feedback
     network_output = np.zeros((len(credits), 2))
     network_output[:, feedback] = credits
+    # print("Credits:", network_output)
 
     input_tensor = torch.as_tensor(state_action_data, dtype=torch.float32).reshape(state_action_data.shape[0], -1)
     output_tensor = torch.as_tensor(network_output).reshape(network_output.shape[0], -1)
 
-    return(input_tensor, output_tensor)
+    # print("IN:", input_tensor)
+    # print("OUT:", output_tensor)
+
+    return input_tensor, output_tensor
 
 
 def make_training_data(input, output):

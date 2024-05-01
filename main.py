@@ -631,7 +631,7 @@ if __name__ == "__main__":
                                     do_snake=args.do_snake == "True", snake_plays=args.snake_plays,
                                     snake_trajs=parse_trajs(args.snake_trajectory))
             elif script == 'retrospective':
-                print(parse_trajs(args.mc_trajectory))
+                # print(parse_trajs(args.mc_trajectory))
                 run_script_retrospective(NUM_PRACTICE_RUNS_RETROSPECTIVE, args.fps,
                                          mc_load=args.load_mc, mc_save=args.save_mc, mc_frame_limit=args.mc_frame_limit,
                                             mc_lr=args.mc_lr, do_mc=args.do_mc == "True", mc_plays=args.mc_plays,
