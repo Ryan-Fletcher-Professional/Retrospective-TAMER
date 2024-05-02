@@ -243,7 +243,7 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
             while not can_go:
                 tm.sleep(1)
             if (not run_continuously) and (current_agent_index not in wait_agents):
-                time.sleep(0.25)
+                tm.sleep(0.25)
             # if trajectory_index % 10 == 0:
             #     print(action_history)
         except IndexError as e:
