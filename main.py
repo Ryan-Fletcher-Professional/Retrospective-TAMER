@@ -181,8 +181,8 @@ def run_script_live(num_practice, fps,
     SNAKE_RULES =\
         """
         You are about to see your AI play Snake.
-        The goal is for the controller to move the head of the snake in one of the four cardinal directions at
-        each step, guiding the snake to eat apples without running the snake into its own tail.
+        The goal is for the controller to move the head of the snake in the same direction it's already moving or
+        turn the snake left or right at each step, guiding the snake to eat apples without running the snake into its own tail.
         The snake does not die if it hits a wall; it will simply wrap around to the other side of the board.
 
         Press the 'c' key when the AI makes a suboptimal move and press the 'v' key when the AI makes an optimal move.
@@ -386,8 +386,8 @@ def run_script_retrospective(num_practice, fps,
     SNAKE_RULES = \
         """
         You are about to see your AI play Snake.
-        The goal is for the controller to move the head of the snake in one of the four cardinal directions at
-        each step, guiding the snake to eat apples without running the snake into its own tail.
+        The goal is for the controller to move the head of the snake in the same direction it's already moving or
+        turn the snake left or right at each step, guiding the snake to eat apples without running the snake into its own tail.
         The snake does not die if it hits a wall; it will simply wrap around to the other side of the board.
 
         When giving feedback:
