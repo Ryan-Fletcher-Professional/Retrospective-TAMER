@@ -1,0 +1,15 @@
+Online only:
+    MC only:
+        python main.py --script live --do_ttt False --do_snake False --load_mc DO_NOT_DELETE_THIS_MC.param --save_mc saved_mc
+    TTT only:
+        python main.py --script live --do_mc False --do_snake False --save_ttt saved_ttt
+    Snake only:
+        python main.py --script live --do_mc False --do_ttt False --load_snake DO_NOT_DELETE_THIS_SNAKE.param --save_snake saved_snake
+
+Retrospective only:
+    MC only:
+        python main.py --script retrospective --do_ttt False --do_snake False --load_mc DO_NOT_DELETE_THIS_MC.param --save_mc saved_mc
+    TTT only:
+        python main.py --script retrospective --do_mc False --do_snake False --save_ttt saved_ttt
+    Snake only:
+        python main.py --script retrospective --do_mc False --do_ttt False --load_snake DO_NOT_DELETE_THIS_SNAKE.param --save_snake saved_snake
