@@ -3,25 +3,16 @@ Steps:
 2. Enter: python --version
 	NOTE: If your OS brings up a store page for Python automatically, do NOT press the download button there!
 	a. If your terminal lists Python 3.11.something, skip to step 3.
-	b. If your terminal says something along the lines of "Python not found" or lists a python version other than 3.11.something, go to python.org.downloads/release/python-3115/ and scroll to the "Files" section at the bottom and click the Windows installer (64 bit) or macOS 64-bit universal2 installer, as appropriate for your OS.
+	b. If your terminal says something along the lines of "Python not found" or lists a python version other than 3.11.something, go to python.org/downloads/release/python-3115/ and scroll to the "Files" section at the bottom and click the Windows installer (64 bit) or macOS 64-bit universal2 installer, as appropriate for your OS.
 		i. Run the downloaded installer.
 		ii. On the first page, click "Add python.exe to PATH" at the bottom.
 		iii. Click "Install Now" and let it run.
-		iv. In the terminal, once again enter python --version and make sure it says Python 3.11.5
-3. In the terminal, enter: git --version
-	a. If your terminal lists just about any version of git (preferably above 2.0.0), skip to step 4.
-	b. If your terminal says something along the lines of "git is not recognized as an internal or external command", go to git-scm.com/downloads and click the appropriate download button for your OS and click "Click here to download" in the new page.
-		i. Run the downloaded installer.
-		ii. Click "Next" 14 times.
-		iii. Click "Install".
-		iv. Uncheck the "View release notes" checkbox.
-		v. Click "Finish".
-		vi. In the terminal, once again enter git --version and make sure it says git version 2.45.0.yourOS.1
-4. On your desktop, create a new folder named "experiment".
-5. In the terminal, type "git clone https://github.com/NephilimGreen/690SProject.git " with the space at the end, but without the quotes. Do not hit enter.
-6. Drag your "experiment" folder into the terminal window, then hit enter.
-7. In the terminal, enter: conda --version
-	a. If your terminal lists just about any conda version (preferably above 20.0.0), skip to step 8.
+		iv. Restart the terminal, then enter python --version and make sure it says Python 3.11.5
+3. On your desktop, create a new folder named "experiment".
+4. Go to https://github.com/NephilimGreen/690SProject.git and click the green "Code" button and click "Download ZIP" at the bottom of the dropdown menu".
+5. Extract the downloaded ZIP directly into your "experiment" folder.
+6. In the terminal, enter: conda --version
+	a. If your terminal lists just about any conda version (preferably above 20.0.0), skip to step 7.
 	b. If your terminal says something along the lines of "conda is not recognized as an internal or external command", go to anaconda.com/download and click "skip registration" under the big green "submit" button and click the download button in the new page.
 		i. Run the downloaded installer.
 		ii. Click "Next", "I agree", "Next", "Next".
@@ -29,11 +20,11 @@ Steps:
 		iv. Click "Install" and let it run.
 		v. Click "Next", "Next".
 		vi. Uncheck both checkboxes and click "Finish".
-		vii. In the terminal, once again enter conda --version and make sure it says Conda 24.1.2
-8. In the terminal, enter: conda create -n experiment
+		vii. Restart the terminal, then enter conda --version and make sure it says Conda 24.1.2
+7. In the terminal, enter: conda create -n experiment
 	a. When it asks whether to procede, enter: y
-9. Enter: conda activate experiment
-10. Type: "cd " with the space at the end but without the quotes. Do not hit enter.
-11. Drag your "experiment" folder into the terminal, then hit enter.
-12. In the terminal, enter: pip install -r requirements.txt
+8. Enter: conda activate experiment
+9. Type: "cd " with the space at the end but without the quotes. Do not hit enter.
+10. From your "experiment" folder, drag the "690SProject-main" folder into the terminal, then hit enter.
+11. In the terminal, enter: pip install -r requirements.txt
 	NOTE: Ignore the errors in red.
