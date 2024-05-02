@@ -49,13 +49,11 @@ class Net(nn.Module):
             else:
                 #print("STATE: " + str(state))
                 #print("ACTION: " + str(action_space[i]), "action size", self.action_size)
-                if self.mode == DEFAULT_MODE:
-                    action_space[i][1] = 1*(state[1]>0)
 
                 state_action = torch.as_tensor(np.append(state, action_space[i]), dtype=torch.float32)
 
                 new_pred = self.predict(state_action)
-                print("Actual predictions:", new_pred)
+                # print("Actual predictions:", new_pred)
                 # print(new_pred)
                 new_pred_proba = nn.functional.softmax(new_pred, dim=0)
                 preds.append(new_pred_proba[1].item())

@@ -90,6 +90,8 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
                 make_training_data(state_action, feedback)
             output_tensor_accumulated = torch.cat((output_tensor_accumulated, output_tensor), 0)
             input_tensor_accumulated = torch.cat((input_tensor_accumulated, input_tensor), 0)
+            print("OUT_ACC", output_tensor_accumulated)
+            print("IN_ACC", input_tensor_accumulated)
             feedback_history_for_logging += [feedback]
             feedback_states_history += [state_action.tolist()]
 

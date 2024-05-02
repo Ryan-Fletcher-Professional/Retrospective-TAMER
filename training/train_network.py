@@ -15,12 +15,13 @@ def train_network(net, input, output, lr=0.2):
     loss_criterion = nn.CrossEntropyLoss()
     optimizer.zero_grad()
     #run action,state through policy to get predicted logits for classifying action
-    pred_action_logits = net.predict(input)
-    output /= torch.sum(output)# output = nn.functional.softmax(output, dim=0)
+    prediction_logits = net.predict(input)
+    # print("OG OUTPUT:", output)
+    #output /= torch.sum(output)# output = nn.functional.softmax(output, dim=0)
     #now compute loss
-    # print("PREDICTED LOGITS:", pred_action_logits)
-    # print("OUTPUT:", output)
-    loss = loss_criterion(pred_action_logits, output)
+    print("PREDICTED LOGITS:", prediction_logits)
+    print("OUTPUT:", output)
+    loss = loss_criterion(prediction_logits, output)
     #back propagate the error through the network
     loss.backward()
     #perform update on policy parameters
