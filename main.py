@@ -218,12 +218,12 @@ def run_script_live(num_practice, fps,
         for _ in range(num_practice):
             display_message_screen(WAIT_PRACTICE)
             mc_net = Net(MOUNTAIN_CAR_MODE)
-            if mc_load is not None:
-                try:
-                    #print("Loading network from", mc_load)
-                    mc_net.load_state_dict(torch.load(mc_load))
-                except Exception as e:
-                    print("Could not load network. Error: ", e)
+            # if mc_load is not None:
+            #     try:
+            #         #print("Loading network from", mc_load)
+            #         mc_net.load_state_dict(torch.load(mc_load))
+            #     except Exception as e:
+            #         print("Could not load network. Error: ", e)
             logging_data = online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, mc_frame_limit, fps, True, lr=mc_lr)
             pygame.quit()
         mc_net = Net(MOUNTAIN_CAR_MODE)
@@ -235,7 +235,7 @@ def run_script_live(num_practice, fps,
                 print("Could not load network. Error: ", e)
         for i in range(mc_plays):
             display_message_screen(WAIT_REAL)
-            logging_data = online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, mc_frame_limit, fps, True, lr=mc_lr, starting_state=mc_trajs[i % len(mc_trajs)][0], trajectory=mc_trajs[i % len(mc_trajs)][1])
+            logging_data = online.collect_live_data(mc_net, MOUNTAIN_CAR_MODE, mc_frame_limit, fps, True, lr=mc_lr, starting_state=None if mc_trajs is None else mc_trajs[i % len(mc_trajs)][0], trajectory=None if mc_trajs is None else mc_trajs[i % len(mc_trajs)][1])
             pygame.quit()
             if mc_save is not None:
                 torch.save(mc_net, mc_save + f"/live_mc_{i+1}.pt")
@@ -247,12 +247,12 @@ def run_script_live(num_practice, fps,
         for _ in range(num_practice):
             display_message_screen(WAIT_PRACTICE)
             ttt_net = Net(TTT_MODE)
-            if ttt_load is not None:
-                try:
-                    #print("Loading network from", ttt_load)
-                    ttt_net.load_state_dict(torch.load(ttt_load))
-                except Exception as e:
-                    print("Could not load network. Error: ", e)
+            # if ttt_load is not None:
+            #     try:
+            #         #print("Loading network from", ttt_load)
+            #         ttt_net.load_state_dict(torch.load(ttt_load))
+            #     except Exception as e:
+            #         print("Could not load network. Error: ", e)
             logging_data = online.collect_live_data(ttt_net, TTT_MODE, ttt_frame_limit, fps, True, lr=ttt_lr)
         ttt_net = Net(TTT_MODE)
         if ttt_load is not None:
@@ -263,7 +263,7 @@ def run_script_live(num_practice, fps,
                 print("Could not load network. Error: ", e)
         for i in range(ttt_plays):
             display_message_screen(WAIT_REAL)
-            logging_data = online.collect_live_data(ttt_net, TTT_MODE, ttt_frame_limit, fps, True, lr=ttt_lr, trajectory=ttt_trajs[i % len(ttt_trajs)][1])
+            logging_data = online.collect_live_data(ttt_net, TTT_MODE, ttt_frame_limit, fps, True, lr=ttt_lr, trajectory=None if ttt_trajs is None else ttt_trajs[i % len(ttt_trajs)][1])
             if ttt_save is not None:
                 torch.save(ttt_net, ttt_save + f"/live_ttt_{i + 1}.pt")
                 with open(ttt_save + f"/logs/live_ttt_{i+1}.json", 'w') as fp:
@@ -274,12 +274,12 @@ def run_script_live(num_practice, fps,
         for _ in range(num_practice):
             display_message_screen(WAIT_PRACTICE)
             snake_net = Net(SNAKE_MODE)
-            if snake_load is not None:
-                try:
-                    #print("Loading network from", snake_load)
-                    snake_net.load_state_dict(torch.load(snake_load))
-                except Exception as e:
-                    print("Could not load network. Error: ", e)
+            # if snake_load is not None:
+            #     try:
+            #         #print("Loading network from", snake_load)
+            #         snake_net.load_state_dict(torch.load(snake_load))
+            #     except Exception as e:
+            #         print("Could not load network. Error: ", e)
             logging_data = online.collect_live_data(snake_net, SNAKE_MODE, snake_frame_limit, fps, True, lr=snake_lr)
             pygame.quit()
         snake_net = Net(SNAKE_MODE)
@@ -291,7 +291,7 @@ def run_script_live(num_practice, fps,
                 print("Could not load network. Error: ", e)
         for i in range(snake_plays):
             display_message_screen(WAIT_REAL)
-            logging_data = online.collect_live_data(snake_net, SNAKE_MODE, snake_frame_limit, fps, True, lr=snake_lr, starting_state=snake_trajs[i % len(snake_trajs)][0], trajectory=snake_trajs[i % len(snake_trajs)][1])
+            logging_data = online.collect_live_data(snake_net, SNAKE_MODE, snake_frame_limit, fps, True, lr=snake_lr, starting_state=None if snake_trajs is None else snake_trajs[i % len(snake_trajs)][0], trajectory=None if snake_trajs is None else snake_trajs[i % len(snake_trajs)][1])
             pygame.quit()
             if snake_save is not None:
                 torch.save(snake_net, snake_save + f"/live_snake_{i + 1}.pt")
@@ -373,10 +373,11 @@ def run_script_retrospective(num_practice, fps,
         The goal is for your AI to write three 'O' characters in a row.
         (The opponent writes one 'X' in before each of your AI's moves.)
 
+        The game will wait for you to press any key (when not giving feedback)
+        or a feedback key (when giving feedback) after each of your AI's moves.
+
         When giving feedback:
         Press the 'c' key when the AI makes a suboptimal move and press the 'v' key when the AI makes an optimal move.
-
-        The game will wait for you to give feedback after each of your AI's moves.
 
 
         Press the Enter key to start the first practice run.
@@ -413,7 +414,7 @@ def run_script_retrospective(num_practice, fps,
     WAIT_REAL = \
         """
         Press the Enter key to start the next TRAINING run.
-        Remember, don't give feedback yet; just pay attention to what your Ai does.
+        Remember, don't give feedback yet; just pay attention to what your AI does.
         """
 
     display_message_screen(INTRO_MESSAGE_1)
@@ -424,12 +425,12 @@ def run_script_retrospective(num_practice, fps,
         for _ in range(num_practice):
             display_message_screen(WAIT_PRACTICE)
             mc_net = Net(MOUNTAIN_CAR_MODE)
-            if mc_load is not None:
-                try:
-                    #print("Loading network from", mc_load)
-                    mc_net.load_state_dict(torch.load(mc_load))
-                except Exception as e:
-                    print("Could not load network. Error: ", e)
+            # if mc_load is not None:
+            #     try:
+            #         #print("Loading network from", mc_load)
+            #         mc_net.load_state_dict(torch.load(mc_load))
+            #     except Exception as e:
+            #         print("Could not load network. Error: ", e)
             action_history, env = offline.offline_no_feedback_run(mc_net, MOUNTAIN_CAR_MODE, mc_frame_limit, fps, True)
             display_message_screen(WAIT_FEEDBACK)
             indata, outdata, logging_data = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, mc_frame_limit, fps,
@@ -445,7 +446,7 @@ def run_script_retrospective(num_practice, fps,
                 print("Could not load network. Error: ", e)
         for i in range(mc_plays):
             display_message_screen(WAIT_REAL)
-            action_history, env = offline.offline_no_feedback_run(mc_net, MOUNTAIN_CAR_MODE, mc_frame_limit, fps, True, starting_state=mc_trajs[i % len(mc_trajs)][0], trajectory=mc_trajs[i % len(mc_trajs)][1])
+            action_history, env = offline.offline_no_feedback_run(mc_net, MOUNTAIN_CAR_MODE, mc_frame_limit, fps, True, starting_state=None if mc_trajs is None else mc_trajs[i % len(mc_trajs)][0], trajectory=None if mc_trajs is None else mc_trajs[i % len(mc_trajs)][1])
             display_message_screen(WAIT_FEEDBACK)
             indata, outdata, logging_data = offline.offline_collect_feedback(mc_net, MOUNTAIN_CAR_MODE, action_history, mc_frame_limit, fps,
                                                                True, env=env)
@@ -461,12 +462,12 @@ def run_script_retrospective(num_practice, fps,
         for _ in range(num_practice):
             display_message_screen(WAIT_PRACTICE)
             ttt_net = Net(TTT_MODE)
-            if ttt_load is not None:
-                try:
-                    #print("Loading network from", ttt_load)
-                    ttt_net.load_state_dict(torch.load(ttt_load))
-                except Exception as e:
-                    print("Could not load network. Error: ", e)
+            # if ttt_load is not None:
+            #     try:
+            #         #print("Loading network from", ttt_load)
+            #         ttt_net.load_state_dict(torch.load(ttt_load))
+            #     except Exception as e:
+            #         print("Could not load network. Error: ", e)
             action_history, env = offline.offline_no_feedback_run(ttt_net, TTT_MODE, ttt_frame_limit, fps, True)
             display_message_screen(WAIT_FEEDBACK)
             indata, outdata, logging_data = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, ttt_frame_limit, fps,
@@ -481,7 +482,7 @@ def run_script_retrospective(num_practice, fps,
                 print("Could not load network. Error: ", e)
         for i in range(ttt_plays):
             display_message_screen(WAIT_REAL)
-            action_history, env = offline.offline_no_feedback_run(ttt_net, TTT_MODE, ttt_frame_limit, fps, True, trajectory=ttt_trajs[i % len(ttt_trajs)][1])
+            action_history, env = offline.offline_no_feedback_run(ttt_net, TTT_MODE, ttt_frame_limit, fps, True, trajectory=None if ttt_trajs is None else ttt_trajs[i % len(ttt_trajs)][1])
             display_message_screen(WAIT_FEEDBACK)
             indata, outdata, logging_data = offline.offline_collect_feedback(ttt_net, TTT_MODE, action_history, ttt_frame_limit, fps,
                                                                True, env=env)
@@ -496,12 +497,12 @@ def run_script_retrospective(num_practice, fps,
         for _ in range(num_practice):
             display_message_screen(WAIT_PRACTICE)
             snake_net = Net(SNAKE_MODE)
-            if snake_load is not None:
-                try:
-                    #print("Loading network from", snake_load)
-                    snake_net.load_state_dict(torch.load(snake_load))
-                except Exception as e:
-                    print("Could not load network. Error: ", e)
+            # if snake_load is not None:
+            #     try:
+            #         #print("Loading network from", snake_load)
+            #         snake_net.load_state_dict(torch.load(snake_load))
+            #     except Exception as e:
+            #         print("Could not load network. Error: ", e)
             action_history, env = offline.offline_no_feedback_run(snake_net, SNAKE_MODE, snake_frame_limit, fps, True)
             display_message_screen(WAIT_FEEDBACK)
             indata, outdata, logging_data = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, snake_frame_limit, fps,
@@ -517,7 +518,7 @@ def run_script_retrospective(num_practice, fps,
                 print("Could not load network. Error: ", e)
         for i in range(snake_plays):
             display_message_screen(WAIT_REAL)
-            action_history, env = offline.offline_no_feedback_run(snake_net, SNAKE_MODE, snake_frame_limit, fps, True, starting_state=snake_trajs[i % len(snake_trajs)][0], trajectory=snake_trajs[i % len(snake_trajs)][1])
+            action_history, env = offline.offline_no_feedback_run(snake_net, SNAKE_MODE, snake_frame_limit, fps, True, starting_state=None if snake_trajs is None else snake_trajs[i % len(snake_trajs)][0], trajectory=None if snake_trajs is None else snake_trajs[i % len(snake_trajs)][1])
             display_message_screen(WAIT_FEEDBACK)
             indata, outdata, logging_data = offline.offline_collect_feedback(snake_net, SNAKE_MODE, action_history, snake_frame_limit, fps,
                                                                True, env=env)

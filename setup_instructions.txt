@@ -36,3 +36,4 @@ Steps:
 10. Type: "cd " with the space at the end but without the quotes. Do not hit enter.
 11. Drag your "experiment" folder into the terminal, then hit enter.
 12. In the terminal, enter: pip install -r requirements.txt
+	NOTE: Ignore the errors in red.
