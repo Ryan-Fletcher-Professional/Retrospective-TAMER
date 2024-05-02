@@ -27,7 +27,12 @@ from playsound import playsound
 device = torch.device('cpu')
 
 
-def offline_collect_feedback(net, env_name, action_history, frame_limit=200, snake_max_fps=20, human_render=True, env=None):
+def offline_collect_feedback(net, env_name, action_history_e, frame_limit=200, snake_max_fps=20, human_render=True, env=None):
+    action_history = action_history_e
+    apple_history = None
+    if env_name == SNAKE_MODE:
+        action_history = action_history_e[:, 0, 0]
+        apple_history = action_history_e[:, 1]
     input_size = MODE_INPUT_SIZES[env_name]
     input_tensor_accumulated = torch.empty((0,) if env_name == TTT_MODE else (0, input_size), dtype=torch.float32)
     output_tensor_accumulated = torch.empty((0,) if env_name == TTT_MODE else (0, 2), dtype=torch.float32)
@@ -116,6 +121,9 @@ def offline_collect_feedback(net, env_name, action_history, frame_limit=200, sna
 
     while not done:
         # take the next action from action_history
+        if env_name == SNAKE_MODE:
+            env.env.s.last_frame = np.clip(env.env.s.last_frame, 0, None)
+            env.env.s.last_frame[apple_history[action_ind][0], apple_history[action_ind][1]] = -1
         current_agent_index = (current_agent_index + 1) % len(agents)  # len(agents) = 1 when in single-agent game
         last_action = int(action_history[action_ind])
         action_ind += 1
@@ -157,7 +165,7 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
     '''
     # print("TRAJECTORY:", trajectory)
 
-    action_history = np.array([])
+    action_history = []
     can_go = True
 
     def get_invalid_actions(inputs):
@@ -227,11 +235,13 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
             last_state, current_reward, terminated, truncated, info = env.step(last_action)
             done = terminated or truncated
             total_reward += current_reward
-            action_history = np.append(action_history, last_action)
+            action_history.append(last_action if env_name != SNAKE_MODE else ((last_action, -1), info["apple"]))
             if (not run_continuously) and (current_agent_index in wait_agents):
                 can_go = False
             while not can_go:
                 tm.sleep(1)
+            # if trajectory_index % 10 == 0:
+            #     print(action_history)
         except IndexError as e:
             print("ERROR ON FRAME:", trajectory_index)
             raise e
@@ -242,7 +252,9 @@ def offline_no_feedback_run(net, env_name, frame_limit=200, snake_max_fps=20, hu
     listener.stop()
     listener.join()
 
-    return action_history, env
+    # print(np.array(action_history))
+
+    return np.array(action_history), env
 
 
 def offline_wrapper(net, env_name, frame_limit=200, snake_max_fps=20, human_render=True, iter=1, lr=0.2):

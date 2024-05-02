@@ -105,7 +105,7 @@ class SnakeGame:
         if new_head_value == (10 * 10) + 1:
             self.done = True
             self.last_frame = new_frame
-            return new_frame, new_head_value - 1, True, {}
+            return new_frame, new_head_value - 1, True, {"apple": apple_coords}
 
         if (new_head_coords[0] == apple_coords[0]) and (new_head_coords[1] == apple_coords[1]):
             while new_frame[apple_coords[0], apple_coords[1]] != 0:
@@ -113,16 +113,16 @@ class SnakeGame:
             new_frame[apple_coords[0], apple_coords[1]] = -1
             new_frame[new_head_coords[0], new_head_coords[1]] = new_head_value
             self.last_frame = new_frame
-            return new_frame, new_head_value, False, {}
+            return new_frame, new_head_value, False, {"apple": apple_coords}
         elif self.last_frame[new_head_coords[0], new_head_coords[1]] > 1:
             self.last_frame = new_frame
-            return new_frame, new_head_value - 1, True, {}
+            return new_frame, new_head_value - 1, True, {"apple": apple_coords}
         else:
             new_frame[new_head_coords[0], new_head_coords[1]] = new_head_value
             new_head_value -= 1
             new_frame[new_frame > 0] -= 1
             self.last_frame = new_frame
-            return new_frame, new_head_value, False, {}
+            return new_frame, new_head_value, False, {"apple": apple_coords}
 
     def get_last_frame(self):
         return np.copy(self.last_frame)

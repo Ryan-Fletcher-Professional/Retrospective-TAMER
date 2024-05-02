@@ -1,2 +1,2 @@
 You will be given instructions for the experiment itself when the program is running.
-In the terminal, enter: python main.py --script all --load_snake DO_NOT_DELETE_THIS_SNAKE.param
+In the terminal, enter: python main.py --script all --load_snake DO_NOT_DELETE_THIS_SNAKE.param --save_mc saved_mc --save_ttt saved_ttt --save_snake saved_snake
