@@ -7,7 +7,7 @@ Steps:
 		i. Run the downloaded installer.
 		ii. On the first page, click "Add python.exe to PATH" at the bottom.
 		iii. Click "Install Now" and let it run.
-		iv. In the terminal, once again enter python --version and make sure it says Python 3.11.5
+		iv. Restart the terminal, then enter python --version and make sure it says Python 3.11.5
 3. In the terminal, enter: git --version
 	a. If your terminal lists just about any version of git (preferably above 2.0.0), skip to step 4.
 	b. If your terminal says something along the lines of "git is not recognized as an internal or external command", go to git-scm.com/downloads and click the appropriate download button for your OS and click "Click here to download" in the new page.
@@ -16,7 +16,7 @@ Steps:
 		iii. Click "Install".
 		iv. Uncheck the "View release notes" checkbox.
 		v. Click "Finish".
-		vi. In the terminal, once again enter git --version and make sure it says git version 2.45.0.yourOS.1
+		vi. Restart the terminal, then enter git --version and make sure it says git version 2.45.0.yourOS.1
 4. On your desktop, create a new folder named "experiment".
 5. In the terminal, type "git clone https://github.com/NephilimGreen/690SProject.git " with the space at the end, but without the quotes. Do not hit enter.
 6. Drag your "experiment" folder into the terminal window, then hit enter.
@@ -29,7 +29,7 @@ Steps:
 		iv. Click "Install" and let it run.
 		v. Click "Next", "Next".
 		vi. Uncheck both checkboxes and click "Finish".
-		vii. In the terminal, once again enter conda --version and make sure it says Conda 24.1.2
+		vii. Restart the terminal, then enter conda --version and make sure it says Conda 24.1.2
 8. In the terminal, enter: conda create -n experiment
 	a. When it asks whether to procede, enter: y
 9. Enter: conda activate experiment
