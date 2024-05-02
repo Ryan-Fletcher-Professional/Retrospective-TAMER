@@ -19,8 +19,8 @@ def train_network(net, input, output, lr=0.2):
     # print("OG OUTPUT:", output)
     #output /= torch.sum(output)# output = nn.functional.softmax(output, dim=0)
     #now compute loss
-    print("PREDICTED LOGITS:", prediction_logits)
-    print("OUTPUT:", output)
+    # print("PREDICTED LOGITS:", prediction_logits)
+    # print("OUTPUT:", output)
     loss = loss_criterion(prediction_logits, output)
     #back propagate the error through the network
     loss.backward()

@@ -167,10 +167,10 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
     listener.stop()
     listener.join()
 
-    print("full_obs_data", full_obs_data)
-    print("feedback", feedback_history)
-    print("feedback_states", feedback_states_history)
-    print("feedback_inds", feedback_frame_ind)
+    # print("full_obs_data", full_obs_data)
+    # print("feedback", feedback_history)
+    # print("feedback_states", feedback_states_history)
+    # print("feedback_inds", feedback_frame_ind)
 
     output_dict = { "state_actions": [l.tolist() for l in full_obs_data],
                     "feedback": feedback_history,
