@@ -582,7 +582,7 @@ if __name__ == "__main__":
     parser.add_argument('--do_ttt', default="True", type=str, help="whether to include the tictactoe game in scripted runs")
     parser.add_argument('--do_snake', default="True", type=str, help="whether to include the snake game in scripted runs")
     parser.add_argument('--mc_plays', default=3, type=int, help="number of plays in the script for mountaincar")
-    parser.add_argument('--ttt_plays', default=5, type=int, help="number of plays in the script for tictactoe")
+    parser.add_argument('--ttt_plays', default=3, type=int, help="number of plays in the script for tictactoe")
     parser.add_argument('--snake_plays', default=3, type=int, help="number of plays in the script for snake")
     parser.add_argument('--mc_trajectory', default=None, type=str, help="manual trajectory directory in the script for mountaincar")
     parser.add_argument('--ttt_trajectory', default=None, type=str, help="manual trajectory directory in the script for tictactoe")
