@@ -141,6 +141,8 @@ def offline_collect_feedback(net, env_name, action_history_e, frame_limit=200, s
             can_go = False
         while not can_go:
             tm.sleep(1)
+        if (not run_continuously) and (current_agent_index not in wait_agents):
+            tm.sleep(0.25)
 
     if env_name == TTT_MODE:
         env.show_result(human_render, total_reward)

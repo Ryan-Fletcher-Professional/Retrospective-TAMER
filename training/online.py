@@ -159,6 +159,8 @@ def collect_live_data(net, env_name, frame_limit=200, snake_max_fps=20, human_re
             can_go = False
         while not can_go:
             tm.sleep(1)
+        if (not run_continuously) and (current_agent_index not in wait_agents):
+            tm.sleep(0.25)
 
     if env_name == TTT_MODE:
         env.show_result(human_render, total_reward)

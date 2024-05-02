@@ -79,16 +79,16 @@ def run_script_practice(num_runs, frame_limit):
     INTRO_MESSAGE =\
         """
         After this screen, you will immediately see the Mountain Car game, which consists of a little car in a valley.
-        
+
         Your goal is to move the car to the top of the right side of the valley.
-        
+
         To move the car right, press the right arrow key. To move it left, press the left arrow key.
-        
+
         Think about how you need to move. The car is not strong enough to simply charge all the way up the mountain.
-        
+
         Play the game a few times to get a good feel for it.
-        
-        
+
+
         Press the Enter key to continue.
         """
 
@@ -114,16 +114,16 @@ def run_script_live(num_practice, fps,
         In this experiment, you will be presented with three games:
         Mountain Car, TicTacToe, and Snake.
         We'll explain their rules later.
-        
+
         For each game, your task will be to use modified 'clicker training' to teach an AI how to play the game.
         Don't worry, it's not as hard as it sounds; we made a program that does the heavy lifting for you! All you need to do is
         press the 'c' key when the AI makes a suboptimal move and press the 'v' key when the AI makes an optimal move.
-        
+
         Make sure you give meaningful feedback, but don't think too too hard about it. Focus on actually giving feedback.
         You don't need to give feedback at every time step except in TicTacToe, but games
         that have a rapid pace give you a lot of opportunity to train your AI.
-        
-        
+
+
         Press the Enter key to see the next screen for more instructions.
         """  # TODO : Change 'optimal' to 'optimal or near-optimal'?
 
@@ -134,15 +134,15 @@ def run_script_live(num_practice, fps,
         Once you're ready after that, you can press the Enter key to begin two practice runs.
         After the practice runs, you'll see the waiting screen for your first real training run.
         (We'll remind you which runs are practice and which are real.)
-        
+
         Before each practice or training run, you'll be presented with a waiting screen.
         Once you're ready there, press the Enter key to continue to the run.
         Then you'll see your AI playing the game, and you will give feedback as it does so.
         It will immediately incorporate your feedback and use it to change its behavior.
-        
+
         After all seven runs are completed for all three games, you'll be done!
-    
-    
+
+
         Press the Enter key to go to the first game.
         """
 
@@ -151,16 +151,16 @@ def run_script_live(num_practice, fps,
         You are about to see your AI play the Mountain Car game.
         The goal is for the controller to move the car to the flag at
         the top of the mountain by accelerating the car left or right.
-        
+
         Press the 'c' key when the AI makes a suboptimal move and press the 'v' key when the AI makes an optimal move.
-        
+
         When your AI is accelerating the Mountain Car, it will have a blue arrow next to it, pointing
         in the direction of acceleration. This should make it easier to give accurate feedback.
-        
+
         This game moves many times per second. You don't need to give feedback at every time
         step, but the rapid pace means you have a lot of opportunity to train your AI.
-        
-        
+
+
         Press the Enter key to start the first practice run.
         """
 
@@ -169,12 +169,12 @@ def run_script_live(num_practice, fps,
         You are about to see your AI play TicTacToe.
         The goal is for your AI to write three 'O' characters in a row.
         (The opponent writes one 'X' in before each of your AI's moves.)
-        
+
         Press the 'c' key when the AI makes a suboptimal move and press the 'v' key when the AI makes an optimal move.
-        
+
         The game will wait for you to give feedback after each of your AI's moves.
-        
-        
+
+
         Press the Enter key to start the first practice run.
         """
 
@@ -184,13 +184,13 @@ def run_script_live(num_practice, fps,
         The goal is for the controller to move the head of the snake in one of the four cardinal directions at
         each step, guiding the snake to eat apples without running the snake into its own tail.
         The snake does not die if it hits a wall; it will simply wrap around to the other side of the board.
-        
+
         Press the 'c' key when the AI makes a suboptimal move and press the 'v' key when the AI makes an optimal move.
-        
+
         This game moves several times per second. You don't need to give feedback at every time
         step, but the rapid pace means you have a lot of opportunity to train your AI.
-        
-        
+
+
         Press the Enter key to start the runs.
         """
 
@@ -229,7 +229,7 @@ def run_script_live(num_practice, fps,
         mc_net = Net(MOUNTAIN_CAR_MODE)
         if mc_load is not None:
             try:
-                #print("Loading network from", mc_load)
+                print("Loading network from", mc_load)
                 mc_net.load_state_dict(torch.load(mc_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
@@ -285,7 +285,7 @@ def run_script_live(num_practice, fps,
         snake_net = Net(SNAKE_MODE)
         if snake_load is not None:
             try:
-                #print("Loading network from", snake_load)
+                print("Loading network from", snake_load)
                 snake_net.load_state_dict(torch.load(snake_load))
             except Exception as e:
                 print("Could not load network. Error: ", e)
@@ -572,16 +572,16 @@ if __name__ == "__main__":
     parser.add_argument('--save_ttt', default=None, type=str, help="directory in which to save the trained tictactoe network after the game is complete")
     parser.add_argument('--load_snake', default=None, type=str, help="path to a saved snake network to load")
     parser.add_argument('--save_snake', default=None, type=str, help="directory in which to save the trained snake network after the game is complete")
-    parser.add_argument('--mc_frame_limit', default=200, type=int, help="number of frames before episode of mountaincar cuts off")
+    parser.add_argument('--mc_frame_limit', default=300, type=int, help="number of frames before episode of mountaincar cuts off")
     parser.add_argument('--ttt_frame_limit', default=200, type=int, help="number of frames before episode of tictactoe cuts off")
     parser.add_argument('--snake_frame_limit', default=100, type=int, help="number of frames before episode of snake cuts off")
-    parser.add_argument('--mc_lr', default=0.2, type=float, help="learning rate for the network for mountaincar")
-    parser.add_argument('--ttt_lr', default=0.2, type=float, help="learning rate for the network for ttt")
+    parser.add_argument('--mc_lr', default=0.4, type=float, help="learning rate for the network for mountaincar")
+    parser.add_argument('--ttt_lr', default=0.4, type=float, help="learning rate for the network for ttt")
     parser.add_argument('--snake_lr', default=0.2, type=float, help="learning rate for the network for snake")
     parser.add_argument('--do_mc', default="True", type=str, help="whether to include the mountaincar game in scripted runs")
     parser.add_argument('--do_ttt', default="True", type=str, help="whether to include the tictactoe game in scripted runs")
     parser.add_argument('--do_snake', default="True", type=str, help="whether to include the snake game in scripted runs")
-    parser.add_argument('--mc_plays', default=5, type=int, help="number of plays in the script for mountaincar")
+    parser.add_argument('--mc_plays', default=3, type=int, help="number of plays in the script for mountaincar")
     parser.add_argument('--ttt_plays', default=5, type=int, help="number of plays in the script for tictactoe")
     parser.add_argument('--snake_plays', default=3, type=int, help="number of plays in the script for snake")
     parser.add_argument('--mc_trajectory', default=None, type=str, help="manual trajectory directory in the script for mountaincar")
