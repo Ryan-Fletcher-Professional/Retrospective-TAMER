@@ -12,7 +12,7 @@ Steps:
 4. Go to https://github.com/NephilimGreen/690SProject.git and click the green "Code" button and click "Download ZIP" at the bottom of the dropdown menu".
 5. Extract the downloaded ZIP directly into your "experiment" folder.
 6. In the terminal, enter: conda --version
-	a. If your terminal lists just about any conda version (preferably above 20.0.0), skip to step 8.
+	a. If your terminal lists just about any conda version (preferably above 20.0.0), skip to step 7.
 	b. If your terminal says something along the lines of "conda is not recognized as an internal or external command", go to anaconda.com/download and click "skip registration" under the big green "submit" button and click the download button in the new page.
 		i. Run the downloaded installer.
 		ii. Click "Next", "I agree", "Next", "Next".
