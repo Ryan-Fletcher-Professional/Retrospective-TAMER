@@ -3,7 +3,7 @@ Steps:
 2. Enter: python --version
 	NOTE: If your OS brings up a store page for Python automatically, do NOT press the download button there!
 	a. If your terminal lists Python 3.11.something, skip to step 3.
-	b. If your terminal says something along the lines of "Python not found" or lists a python version other than 3.11.something, go to python.org.downloads/release/python-3115/ and scroll to the "Files" section at the bottom and click the Windows installer (64 bit) or macOS 64-bit universal2 installer, as appropriate for your OS.
+	b. If your terminal says something along the lines of "Python not found" or lists a python version other than 3.11.something, go to python.org/downloads/release/python-3115/ and scroll to the "Files" section at the bottom and click the Windows installer (64 bit) or macOS 64-bit universal2 installer, as appropriate for your OS.
 		i. Run the downloaded installer.
 		ii. On the first page, click "Add python.exe to PATH" at the bottom.
 		iii. Click "Install Now" and let it run.
