@@ -35,7 +35,6 @@ if __name__ == "__main__":
 
     # TODO :
     #   Implement the test methods
-    #   Extensions need dots?
 
     mc_process = []
     ttt_process = []
@@ -66,7 +65,7 @@ if __name__ == "__main__":
         if args.mode == "compare":
             if filename in compared:
                 continue
-            if extension != "json":
+            if extension != ".json":
                 print("SKIPPED (filetype):", filename)
                 continue
             if "_live" not in filename:
@@ -86,11 +85,11 @@ if __name__ == "__main__":
                     with open(filename2, 'r') as file2:
                         to_append.append((name.replace("_live", ""), compare(json.load(file), json.load(file2))))
         else:
-            if (args.mode == "performance") and ((extension == "param") or (extension == "pt")):
+            if (args.mode == "performance") and ((extension == ".param") or (extension == ".pt")):
                 net = Net(env_name)
                 net.load_state_dict(torch.load(filename))
                 to_append.append((name, test_performance(net, env_name, args.mc_plays if (env_name == MOUNTAIN_CAR_MODE) else (args.ttt_plays if (env_name == TTT_MODE) else args.snake_plays))))
-            elif extension == "json":
+            elif extension == ".json":
                 with open(filename, 'r') as file:
                     to_append.append((name, test_frequency(json.load(file)) if (args.mode == "frequency") else test_timing(json.load(file))))
             else:
