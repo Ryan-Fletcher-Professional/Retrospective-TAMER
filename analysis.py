@@ -60,7 +60,7 @@ if __name__ == "__main__":
                 to_append.append((name, test_performance(net, env_name, args.mc_plays if (env_name == MOUNTAIN_CAR_MODE) else (args.ttt_plays if (env_name == TTT_MODE) else args.snake_plays))))
             elif extension == "json":
                 with open(filename, 'r') as file:
-                    to_append.append(test_frequency(json.load(file)) if (args.mode == "frequency") else test_timing(json.load(file)))
+                    to_append.append((name, test_frequency(json.load(file)) if (args.mode == "frequency") else test_timing(json.load(file))))
             else:
                 print("SKIPPED (filetype):", filename)
 
