@@ -4,6 +4,7 @@ from gym import spaces
 import pygame
 import numpy as np
 from pygame.locals import *
+from environment.GLOBALS import *
 
 
 class SnakeEnvCustom(gym.Env):
@@ -30,38 +31,39 @@ class SnakeEnvCustom(gym.Env):
         return self.s.get_last_frame()
 
     def render(self):
-        canvas = pygame.Surface((self.window_size, self.window_size))
-        canvas.fill((255, 255, 255))
-        pix_square_size = (
-                self.window_size / self.size
-        )  # The size of a single grid square in pixels
+        if RENDER_SNAKE:
+            canvas = pygame.Surface((self.window_size, self.window_size))
+            canvas.fill((255, 255, 255))
+            pix_square_size = (
+                    self.window_size / self.size
+            )  # The size of a single grid square in pixels
 
-        for r in range(self.s.last_frame.shape[0]):
-            for c in range(self.s.last_frame.shape[1]):
-                color = (255, 255, 255)
-                if self.s.last_frame[r, c] == -1:
-                    color = (255, 0, 0)
-                elif self.s.last_frame[r, c] > 0:
-                    color = (0, 0, 0)
-                # Now we draw the agent
-                pygame.draw.rect(
-                    canvas,
-                    color,
-                    pygame.Rect(
-                        pix_square_size * np.asarray((r, c)),
-                        (pix_square_size, pix_square_size),
-                    ),
-                )
+            for r in range(self.s.last_frame.shape[0]):
+                for c in range(self.s.last_frame.shape[1]):
+                    color = (255, 255, 255)
+                    if self.s.last_frame[r, c] == -1:
+                        color = (255, 0, 0)
+                    elif self.s.last_frame[r, c] > 0:
+                        color = (0, 0, 0)
+                    # Now we draw the agent
+                    pygame.draw.rect(
+                        canvas,
+                        color,
+                        pygame.Rect(
+                            pix_square_size * np.asarray((r, c)),
+                            (pix_square_size, pix_square_size),
+                        ),
+                    )
 
-        if self.render_yn == "human":
-            # The following line copies our drawings from `canvas` to the visible window
-            self.window.blit(canvas, canvas.get_rect())
-            pygame.display.flip()
-            pygame.display.update()
+            if self.render_yn == "human":
+                # The following line copies our drawings from `canvas` to the visible window
+                self.window.blit(canvas, canvas.get_rect())
+                pygame.display.flip()
+                pygame.display.update()
 
-            # We need to ensure that human-rendering occurs at the predefined framerate.
-            # The following line will automatically add a delay to keep the framerate stable.
-            self.clock.tick(self.metadata["render_fps"])
+                # We need to ensure that human-rendering occurs at the predefined framerate.
+                # The following line will automatically add a delay to keep the framerate stable.
+                self.clock.tick(self.metadata["render_fps"])
 
 
 class SnakeGame:

@@ -1,5 +1,6 @@
 import argparse
 import json
+import math
 import os
 import torch
 from environment.GLOBALS import *
@@ -26,7 +27,7 @@ def test_frequency(log, is_gamma):
                 bad += 1
             else:
                 good += 1
-    return {"overall": (bad + good) / len(log["state_actions"]), "good_bad": good / bad}
+    return {"overall": (bad + good) / len(log["state_actions"]), "good_bad": (good / bad) if (bad > 0) else math.inf}
 
 
 def test_timing(log, is_gamma):
@@ -155,11 +156,12 @@ if __name__ == "__main__":
                 to_append.append((name, test_performance(net, env_name, args.mc_plays if (env_name == MOUNTAIN_CAR_MODE) else (args.ttt_plays if (env_name == TTT_MODE) else args.snake_plays))))
             elif ((args.mode == "frequency") or (args.mode == "timing")) and (extension == ".json"):
                 with open(filepath, 'r') as file:
+                    #print("SAVING:", name)
                     to_append.append((name, test_frequency(json.load(file), env_name != TTT_MODE) if (args.mode == "frequency") else test_timing(json.load(file), env_name != TTT_MODE)))
             else:
                 print("SKIPPED (filetype):", filename)
 
-    if args.display is not None:
+    if args.display == "True":
         if args.mode == "performance":
             for key, value_list in to_display.items():
                 means, stdevs = zip(*value_list)
@@ -173,6 +175,7 @@ if __name__ == "__main__":
             plt.grid(True)
             plt.show()
         elif args.mode == "frequency":
+            print(to_display)
             fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(14, 6))
 
             for key, value_list in to_display.items():
@@ -181,7 +184,8 @@ if __name__ == "__main__":
                 axes[0].plot(x_positions, values, marker='o', label=key)
 
             for key, value_list in to_display.items():
-                values = [t[1] for t in value_list]
+                values_unfixed = [t[1] for t in value_list]
+                values = [value if (value < math.inf) else max(values_unfixed) for value in values_unfixed]
                 x_positions = np.arange(len(values))
                 axes[1].plot(x_positions, values, marker='o', label=key)
 

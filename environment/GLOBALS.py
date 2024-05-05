@@ -52,3 +52,5 @@ NUM_REAL_RUNS = 2
 
 PING_SOUND = 'start-13691.mp3'
 BLOOP_SOUND = 'bloop-1-184019.mp3'
+
+RENDER_SNAKE = False
