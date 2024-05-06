@@ -62,12 +62,12 @@ def test_performance(net, env_name, plays):
         for i in range(plays):
             done = False
             total_reward = 0
-            env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE,render_mode = None), frame_limit = 300, starting_state = None)
+            env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE,render_mode = None), frame_limit = 500, starting_state = None)
             last_state, _ = env.reset()
             progress_towards_flag = np.array([])
             while not done:
                 action = net.predict_max_action(last_state, get_invalid_actions(last_state))
-                last_state, rew, terminated, truncated, info  = env.step(action)
+                last_state, rew, terminated, truncated, info = env.step(action)
                 done = terminated or truncated
                 total_reward += rew
                 progress_towards_flag = np.append(progress_towards_flag, last_state[0])
@@ -80,11 +80,11 @@ def test_performance(net, env_name, plays):
         for i in range(plays):
             done = False
             total_reward = 0
-            env = SnakeWrapper(gym.make(SNAKE_MODE), render_mode = None, frame_limit = 100, max_fps = 80, starting_state=None)
+            env = SnakeWrapper(gym.make(SNAKE_MODE), render_mode=None, frame_limit=500, max_fps=100, starting_state=None)
             last_state, _ = env.reset()
             while not done:
                 action = net.predict_max_action(last_state, get_invalid_actions(last_state))
-                last_state, rew, terminated, truncated, info  = env.step(action)
+                last_state, rew, terminated, truncated, info = env.step(action)
                 done = terminated or truncated
                 total_reward = rew
             policy_returns = np.append(policy_returns, total_reward)
@@ -106,7 +106,8 @@ def test_performance(net, env_name, plays):
             done = False
             start_time = time.now()
             while not done:
-                current_agent_index = (current_agent_index + 1) % len(agents)  # len(agents) = 1 when in single-agent game
+                current_agent_index = (current_agent_index + 1) % len(
+                    agents)  # len(agents) = 1 when in single-agent game
                 last_action = agents[current_agent_index](last_state)
                 last_state, current_reward, terminated, truncated, info = env.step(last_action)
                 done = terminated or truncated
@@ -115,6 +116,7 @@ def test_performance(net, env_name, plays):
                 env.show_result(human_render, total_reward)
             policy_returns = np.append(policy_returns, total_reward)
         return {"mean": np.mean(policy_returns), "std": np.std(policy_returns)}
+
 
 def test_frequency(log, is_gamma):
     bad = 0
@@ -162,14 +164,11 @@ if __name__ == "__main__":
     parser.add_argument('--save', default=None, type=str, help="directory in which to save the evaluations")
     parser.add_argument('--mode', default="frequency", type=str, help="performance/frequency/timing/compare")
     parser.add_argument('--display', default="False", type=str, help="whether to display already-processed results of the given mode")
-    parser.add_argument('--mc_plays', default=1, type=int, help="number of runs for mountaincar performance evaluation")
-    parser.add_argument('--ttt_plays', default=1, type=int, help="number of runs for tictactoe performance evaluation")
-    parser.add_argument('--snake_plays', default=1, type=int, help="number of runs for snake performance evaluation")
+    parser.add_argument('--mc_plays', default=100, type=int, help="number of runs for mountaincar performance evaluation")
+    parser.add_argument('--ttt_plays', default=100, type=int, help="number of runs for tictactoe performance evaluation")
+    parser.add_argument('--snake_plays', default=100, type=int, help="number of runs for snake performance evaluation")
 
     args = parser.parse_args()
-
-    # TODO :
-    #   Implement the test methods
 
     mc_process = []
     ttt_process = []
