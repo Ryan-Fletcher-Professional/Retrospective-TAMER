@@ -1,7 +1,7 @@
 Mob: Retrospective first
-Red:
-Thistle:
-morf:
+Red: Live first
+Thistle: Live first
+morf: Retrospective first
 Frog:
 Something:
 TRo:

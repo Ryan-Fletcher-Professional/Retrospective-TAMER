@@ -60,6 +60,7 @@ def test_performance(net, env_name, plays):
     policy_returns = np.array([])
     if env_name == MOUNTAIN_CAR_MODE:
         for i in range(plays):
+            print(env_name, ":", i)
             done = False
             total_reward = 0
             env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE,render_mode = None), frame_limit = 500, starting_state = None)
@@ -78,9 +79,10 @@ def test_performance(net, env_name, plays):
 
     elif env_name == SNAKE_MODE:
         for i in range(plays):
+            print(env_name, ":", i)
             done = False
             total_reward = 0
-            env = SnakeWrapper(gym.make(SNAKE_MODE), render_mode=None, frame_limit=500, max_fps=100, starting_state=None)
+            env = SnakeWrapper(gym.make(SNAKE_MODE), render_mode=None, frame_limit=200, max_fps=100, starting_state=None)
             last_state, _ = env.reset()
             while not done:
                 action = net.predict_max_action(last_state, get_invalid_actions(last_state))
@@ -93,6 +95,7 @@ def test_performance(net, env_name, plays):
         human_render = False
         frame_limit = 100
         for i in range(plays):
+            print(env_name, ":", i)
             agents = [lambda net_input: net.predict_max_action(net_input, get_invalid_actions(net_input))]
             current_agent_index = 0
             wait_agents = [0]  # Which agents to wait for when not running continuously
@@ -272,6 +275,7 @@ if __name__ == "__main__":
 
     if args.display == "True":
         if args.mode == "performance":
+            # TODO : Add checks for env_name in performance name and display each env_name in a separate plot
             for key, value_list in to_display.items():
                 means, stdevs = zip(*value_list)
                 x_positions = np.arange(len(means))
