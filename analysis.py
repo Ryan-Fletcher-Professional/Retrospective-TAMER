@@ -145,7 +145,7 @@ def test_timing(log, is_gamma):
     feedback_inds = log["feedback_inds"]
     state_actions = log["state_actions"]
     for i in range(len(feedback_inds)):
-        true_index = len(state_actions) - 1 + feedback_inds[i]
+        true_index = len(state_actions) + feedback_inds[i]
         if is_gamma:
             if feedbacks[i][0][0] > 0:
                 bads.append(true_index)
@@ -156,7 +156,7 @@ def test_timing(log, is_gamma):
                 bads.append(true_index)
             else:
                 goods.append(true_index)
-    return {"overall": np.mean(np.array(bads + goods)) if (len(bads + goods) > 0) else -1, "good": np.mean(np.array(goods)) if (len(goods) > 0) else -1, "bad": np.mean(np.array(bads)) if (len(bads) > 0) else -1, "good_indeces": goods, "bad_indeces": bads}
+    return {"overall": np.mean(np.array(bads + goods)) if (len(bads + goods) > 0) else None, "good": np.mean(np.array(goods)) if (len(goods) > 0) else None, "bad": np.mean(np.array(bads)) if (len(bads) > 0) else None, "good_indeces": goods, "bad_indeces": bads}
 
 
 def compare(test1, test2):
