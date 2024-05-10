@@ -60,7 +60,11 @@ def test_performance(net, env_name, plays):
     policy_returns = np.array([])
     if env_name == MOUNTAIN_CAR_MODE:
         for i in range(plays):
+<<<<<<< Updated upstream
             print(env_name, ":", i)
+=======
+            print("mc: ", i)
+>>>>>>> Stashed changes
             done = False
             total_reward = 0
             env = MountainCarWrapper(gym.make(MOUNTAIN_CAR_MODE,render_mode = None), frame_limit = 500, starting_state = None)
@@ -79,10 +83,17 @@ def test_performance(net, env_name, plays):
 
     elif env_name == SNAKE_MODE:
         for i in range(plays):
+<<<<<<< Updated upstream
             print(env_name, ":", i)
             done = False
             total_reward = 0
             env = SnakeWrapper(gym.make(SNAKE_MODE), render_mode=None, frame_limit=200, max_fps=100, starting_state=None)
+=======
+            print("snek: ", i)
+            done = False
+            total_reward = 0
+            env = SnakeWrapper(gym.make(SNAKE_MODE), render_mode="human", frame_limit=200, max_fps=100, starting_state=None)
+>>>>>>> Stashed changes
             last_state, _ = env.reset()
             while not done:
                 action = net.predict_max_action(last_state, get_invalid_actions(last_state))
@@ -95,7 +106,11 @@ def test_performance(net, env_name, plays):
         human_render = False
         frame_limit = 100
         for i in range(plays):
+<<<<<<< Updated upstream
             print(env_name, ":", i)
+=======
+            print("ttt: ", i)
+>>>>>>> Stashed changes
             agents = [lambda net_input: net.predict_max_action(net_input, get_invalid_actions(net_input))]
             current_agent_index = 0
             wait_agents = [0]  # Which agents to wait for when not running continuously
@@ -145,7 +160,11 @@ def test_timing(log, is_gamma):
     feedback_inds = log["feedback_inds"]
     state_actions = log["state_actions"]
     for i in range(len(feedback_inds)):
+<<<<<<< Updated upstream
         true_index = len(state_actions) + feedback_inds[i]
+=======
+        true_index = len(state_actions) - 1 + feedback_inds[i]
+>>>>>>> Stashed changes
         if is_gamma:
             if feedbacks[i][0][0] > 0:
                 bads.append(true_index)
@@ -156,8 +175,12 @@ def test_timing(log, is_gamma):
                 bads.append(true_index)
             else:
                 goods.append(true_index)
+<<<<<<< Updated upstream
     return {"overall": np.mean(np.array(bads + goods)) if (len(bads + goods) > 0) else None, "good": np.mean(np.array(goods)) if (len(goods) > 0) else None, "bad": np.mean(np.array(bads)) if (len(bads) > 0) else None, "good_indeces": goods, "bad_indeces": bads}
 
+=======
+    return {"overall": np.mean(np.array(bads + goods)) if (len(bads + goods) > 0) else -1, "good": np.mean(np.array(goods)) if (len(goods) > 0) else -1, "bad": np.mean(np.array(bads)) if (len(bads) > 0) else -1, "good_indeces": goods, "bad_indeces": bads}
+>>>>>>> Stashed changes
 
 def compare(test1, test2):
     return -1
