@@ -2,4 +2,6 @@ This was an experimental study with external participants. We created a method t
 
 See setup_instructions.txt to add the experiment to your device, and see and run_instructions.txt if you want to experience the experiment.
 
+See HCML.pdf for final results paper.
+
 [1]: See tamer.pdf for the original paper.
